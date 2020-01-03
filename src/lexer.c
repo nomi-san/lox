@@ -27,6 +27,23 @@ static char advance(lexer_t *lexer)
     return lexer->current[-1];
 }
 
+static char peek(lexer_t *lexer)
+{
+    return *lexer->current;
+}
+
+static char peekNext(lexer_t *lexer)
+{
+    if (isAtEnd(lexer)) return '\0';
+    return lexer->current[1];
+}
+
+static void newLine(lexer_t *lexer)
+{
+    lexer->line++;
+    lexer->position = 0;
+}
+
 static bool match(lexer_t *lexer, char expected)
 {
     if (isAtEnd(lexer)) return false;
@@ -61,8 +78,42 @@ static tok_t errorToken(lexer_t *lexer, const char *message)
     return token;
 }
 
+static void skipWhitespace(lexer_t *lexer)
+{
+    for (;;) {
+        char c = peek(lexer);
+        switch (c) {
+            case ' ':
+            case '\r':
+            case '\t':
+                advance(lexer);
+                break;
+
+            case '\n':
+                newLine(lexer);
+                advance(lexer);
+                break;
+
+            case '/':
+                if (peekNext(lexer) == '/') {
+                    // A comment goes until the end of the line.   
+                    while (peek(lexer) != '\n' && !isAtEnd(lexer)) advance(lexer);
+                }
+                else {
+                    return;
+                }
+                break;
+
+        default:
+            return;
+        }
+    }
+}
+
 tok_t lexer_scan(lexer_t *lexer)
 {
+    skipWhitespace(lexer);
+
     lexer->start = lexer->current;
 
     if (isAtEnd(lexer)) return makeToken(lexer, TOKEN_EOF);
