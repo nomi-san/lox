@@ -15,6 +15,12 @@ void lexer_init(lexer_t *lexer, vm_t *vm, const char *fname, const char *source)
     lexer->position = 1;
 }
 
+static bool isDigit(char c)
+{
+    return (c >= '0')
+        && (c <= '9');
+}
+
 static bool isAtEnd(lexer_t *lexer)
 {
     return *lexer->current == '\0';
@@ -110,7 +116,22 @@ static void skipWhitespace(lexer_t *lexer)
     }
 }
 
-static tok_t string(lexer_t *lexer, char *start)
+static tok_t number(lexer_t *lexer)
+{
+    while (isDigit(peek(lexer))) advance(lexer);
+
+    // Look for a fractional part.             
+    if (peek(lexer) == '.' && isDigit(peekNext(lexer))) {
+        // Consume the ".".                      
+        advance(lexer);
+
+        while (isDigit(peek(lexer))) advance(lexer);
+    }
+
+    return makeToken(lexer, TOKEN_NUMBER);
+}
+
+static tok_t string(lexer_t *lexer, char start)
 {
     while (peek(lexer) != start && !isAtEnd(lexer)) {
         if (peek(lexer) == '\n') newLine(lexer);
@@ -133,6 +154,8 @@ tok_t lexer_scan(lexer_t *lexer)
     if (isAtEnd(lexer)) return makeToken(lexer, TOKEN_EOF);
 
     char c = advance(lexer);
+
+    if (isDigit(c)) return number(lexer);
 
     switch (c) {
         case '(': return makeToken(lexer, TOKEN_LEFT_PAREN);
