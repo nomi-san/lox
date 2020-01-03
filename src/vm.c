@@ -8,10 +8,25 @@
 
 vm_t *vm_create()
 {
+    vm_t *vm = malloc(sizeof(vm_t));
 
+    if (vm != NULL) {
+        memset(vm, '\0', sizeof(vm_t));
+
+    }
+
+    return vm;
 }
 
 void vm_close(vm_t *vm)
 {
+    if (vm == NULL) return;
+
+    free(vm);
+}
+
+static int execute(vm_t *vm)
+{
+
 
 }
