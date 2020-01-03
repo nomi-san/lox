@@ -30,3 +30,13 @@ static int execute(vm_t *vm)
 
     return VM_OK;
 }
+
+int do_string(vm_t *vm, const char *source)
+{
+
+}
+
+int do_file(vm_t *file, const char *fname)
+{
+
+}
