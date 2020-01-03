@@ -15,6 +15,13 @@ void lexer_init(lexer_t *lexer, vm_t *vm, const char *fname, const char *source)
     lexer->position = 1;
 }
 
+static bool isAlpha(char c)
+{
+    return (c >= 'a' && c <= 'z')
+        || (c >= 'A' && c <= 'Z')
+        || (c == '_');
+}
+
 static bool isDigit(char c)
 {
     return (c >= '0')
@@ -116,6 +123,59 @@ static void skipWhitespace(lexer_t *lexer)
     }
 }
 
+static toktype_t checkKeyword(lexer_t *lexer, int start, int length, const char *rest, toktype_t type)
+{
+    if (lexer->current - lexer->start == start + length &&
+        memcmp(lexer->start + start, rest, length) == 0) {
+        return type;
+    }
+
+    return TOKEN_IDENTIFIER;
+}
+
+static toktype_t identifierType(lexer_t *lexer)
+{
+    switch (lexer->start[0]) {
+        case 'a': return checkKeyword(lexer, 1, 2, "nd", TOKEN_AND);
+        case 'c': return checkKeyword(lexer, 1, 4, "lass", TOKEN_CLASS);
+        case 'e': return checkKeyword(lexer, 1, 3, "lse", TOKEN_ELSE);
+        case 'f':
+            if (lexer->current - lexer->start > 1) {
+                switch (lexer->start[1]) {
+                    case 'a': return checkKeyword(lexer, 2, 3, "lse", TOKEN_FALSE);
+                    case 'o': return checkKeyword(lexer, 2, 1, "r", TOKEN_FOR);
+                    case 'u': return checkKeyword(lexer, 2, 1, "n", TOKEN_FUN);
+                }
+            }
+            break;
+        case 'i': return checkKeyword(lexer, 1, 1, "f", TOKEN_IF);
+        case 'n': return checkKeyword(lexer, 1, 2, "il", TOKEN_NIL);
+        case 'o': return checkKeyword(lexer, 1, 1, "r", TOKEN_OR);
+        case 'p': return checkKeyword(lexer, 1, 4, "rint", TOKEN_PRINT);
+        case 'r': return checkKeyword(lexer, 1, 5, "eturn", TOKEN_RETURN);
+        case 's': return checkKeyword(lexer, 1, 4, "uper", TOKEN_SUPER);
+        case 't':
+            if (lexer->current - lexer->start > 1) {
+                switch (lexer->start[1]) {
+                    case 'h': return checkKeyword(lexer, 2, 2, "is", TOKEN_THIS);
+                    case 'r': return checkKeyword(lexer, 2, 2, "ue", TOKEN_TRUE);
+                }
+            }
+            break;
+        case 'v': return checkKeyword(lexer, 1, 2, "ar", TOKEN_VAR);
+        case 'w': return checkKeyword(lexer, 1, 4, "hile", TOKEN_WHILE);
+    }
+
+    return TOKEN_IDENTIFIER;
+}
+
+static tok_t identifier(lexer_t *lexer)
+{
+    while (isAlpha(peek(lexer)) || isDigit(peek(lexer))) advance(lexer);
+
+    return makeToken(lexer, identifierType(lexer));
+}
+
 static tok_t number(lexer_t *lexer)
 {
     while (isDigit(peek(lexer))) advance(lexer);
@@ -154,7 +214,7 @@ tok_t lexer_scan(lexer_t *lexer)
     if (isAtEnd(lexer)) return makeToken(lexer, TOKEN_EOF);
 
     char c = advance(lexer);
-
+    if (isAlpha(c)) return identifier(lexer);
     if (isDigit(c)) return number(lexer);
 
     switch (c) {
