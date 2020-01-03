@@ -11,4 +11,6 @@ typedef struct {
 
 void chunk_init(chunk_t *chunk);
 void chunk_free(chunk_t *chunk);
-void chunk_emit(chunk_t *chunk, uint8_t byte, int line, int column);
+void chunk_emit(chunk_t *chunk, uint8_t byte, int ln, int col);
+
+#define CHUNK_CODEPAGE  256
