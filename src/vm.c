@@ -28,5 +28,5 @@ void vm_close(vm_t *vm)
 static int execute(vm_t *vm)
 {
 
-
+    return VM_OK;
 }
