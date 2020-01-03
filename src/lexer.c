@@ -110,6 +110,20 @@ static void skipWhitespace(lexer_t *lexer)
     }
 }
 
+static tok_t string(lexer_t *lexer, char *start)
+{
+    while (peek(lexer) != start && !isAtEnd(lexer)) {
+        if (peek(lexer) == '\n') newLine(lexer);
+        advance(lexer);
+    }
+
+    if (isAtEnd(lexer)) return errorToken(lexer, "Unterminated string.");
+
+    // The closing quote.                                    
+    advance(lexer);
+    return makeToken(lexer, TOKEN_STRING);
+}
+
 tok_t lexer_scan(lexer_t *lexer)
 {
     skipWhitespace(lexer);
@@ -141,6 +155,9 @@ tok_t lexer_scan(lexer_t *lexer)
             return makeToken(lexer, match(lexer, '=') ? TOKEN_LESS_EQUAL : TOKEN_LESS);
         case '>':
             return makeToken(lexer, match(lexer, '=') ? TOKEN_GREATER_EQUAL : TOKEN_GREATER);
+
+        case '\'':
+        case '\"': return string(lexer, c);
     }
 
     return errorToken(lexer, "Unexpected character.");
