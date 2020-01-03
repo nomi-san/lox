@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "value.h"
 
@@ -38,4 +39,34 @@ bool val_equal(val_t a, val_t b)
     }
 
     return false;
+}
+
+void arr_init(arr_t *array)
+{
+    array->count = 0;
+    array->capacity = 0;
+    array->values = NULL;
+}
+
+void arr_free(arr_t *array)
+{
+    free(array->values);
+    arr_init(array);
+}
+
+int arr_add(arr_t *array, val_t value, bool allowdup)
+{
+    if (!allowdup) {
+        for (int i = 0; i < array->count; i++)
+            if (val_equal(array->values[i], value))
+                return i;
+    }
+
+    if (array->count >= array->capacity) {
+        array->capacity = GROW_CAPACITY(array->capacity);
+        array->values = realloc(array->values, array->capacity * sizeof(val_t));
+    }
+
+    array->values[array->count] = value;
+    return array->count++;
 }

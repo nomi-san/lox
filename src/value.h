@@ -21,6 +21,12 @@ typedef struct {
     };
 } val_t;
 
+typedef struct {
+    int count;
+    int capacity;
+    val_t *values;
+} arr_t;
+
 static const val_t VAL_NIL = { .type = VT_NIL };
 static const val_t VAL_TRUE = { .type = VT_BOOL, .Bool = true };
 static const val_t VAL_FALSE = { .type = VT_BOOL, .Bool = false };
@@ -43,3 +49,7 @@ static const val_t VAL_FALSE = { .type = VT_BOOL, .Bool = false };
 
 void val_print(val_t value);
 bool val_equal(val_t a, val_t b);
+
+void arr_init(arr_t *array);
+void arr_free(arr_t *array);
+int arr_add(arr_t *array, val_t value, bool allowdup);
