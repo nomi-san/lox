@@ -47,3 +47,4 @@ typedef struct {
 } lexer_t;
 
 void lexer_init(lexer_t *lexer, vm_t *vm, const char *fname, const char *source);
+tok_t lexer_scan(lexer_t *lexer);
