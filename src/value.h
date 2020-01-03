@@ -11,7 +11,7 @@ typedef enum {
     VT_OBJ
 } vtype_t;
 
-typedef struct {
+struct _val {
     vtype_t type;
     union {
         bool Bool : 1;
@@ -19,7 +19,7 @@ typedef struct {
         obj_t *Obj;
         uint64_t raw;
     };
-} val_t;
+};
 
 typedef struct {
     int count;
