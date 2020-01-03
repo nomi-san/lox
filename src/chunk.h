@@ -3,6 +3,16 @@
 #include "common.h"
 #include "value.h"
 
+typedef enum {
+    OP_RET,
+    OP_PRINT,
+    OP_POP,
+    OP_NIL,
+    OP_TRUE,
+    OP_FALSE,
+    OP_CONST,
+} opcode_t;
+
 typedef struct {
     int count;
     int capacity;
