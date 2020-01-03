@@ -1,12 +1,14 @@
 #pragma once
 
 #include "common.h"
+#include "value.h"
 
 typedef struct {
     int count;
     int capacity;
     uint8_t *code;
     uint32_t *lines;
+    arr_t constants;
 } chunk_t;
 
 void chunk_init(chunk_t *chunk);
