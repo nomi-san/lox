@@ -123,11 +123,15 @@ static int execute(vm_t *vm)
         }
 
         CODE(NEG) {
-            if (IS_NUM(PEEK(0))) {
-                double n = AS_NUM(POP());
-                PUSH(VAL_NUM(-n));
-            } else {
-                ERROR("Operands must be a number.");                             
+            switch (AS_TYPE(PEEK(0))) {
+                case VT_BOOL:
+                    PUSH(VAL_NUM((double)AS_BOOL(POP())));
+                    break;
+                case VT_NUM:
+                    PUSH(VAL_NUM(-AS_NUM(POP())));
+                    break;
+                default:
+                    ERROR("Operands must be a number or boolean.");
             }
             NEXT;
         }
