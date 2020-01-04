@@ -115,7 +115,8 @@ static void emitConstant(parser_t *parser, val_t value)
     uint16_t constant = makeConstant(parser, value);
 
     if (constant > UINT8_MAX) {
-
+        emitByte(parser, OP_CONSTL);
+        emitBytes(parser, (constant >> 8) & 0xFF, constant & 0xFF);
         return;
     }
 
