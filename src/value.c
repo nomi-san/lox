@@ -24,21 +24,25 @@ void val_print(val_t value)
 
 bool val_equal(val_t a, val_t b)
 {
-    if (AS_TYPE(a) != AS_TYPE(b))
-        return false;
+    vtype_t ta = AS_TYPE(a);
+    vtype_t tb = AS_TYPE(b);
 
-    switch (AS_TYPE(a)) {
-        case VT_NIL:
+    switch (CMB_BYTES(ta, tb)) {
+        case VT_NIL_NIL:
             return true;
-        case VT_BOOL:
+        case VT_BOOL_BOOL:
             return AS_BOOL(a) == AS_BOOL(b);
-        case VT_NUM:
+        case VT_NUM_NUM:
             return AS_NUM(a) == AS_NUM(b);
-        case VT_OBJ:
+        case VT_OBJ_OBJ:
             return AS_OBJ(a) == AS_OBJ(b);
+        case VT_BOOL_NUM:
+            return (double)AS_BOOL(a) == AS_NUM(b);
+        case VT_NUM_BOOL:
+            return AS_NUM(a) == (double)AS_BOOL(b);
+        default:
+            return false;
     }
-
-    return false;
 }
 
 void arr_init(arr_t *array)
