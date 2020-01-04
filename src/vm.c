@@ -64,6 +64,10 @@ static int execute(vm_t *vm)
             PUSH(vm, READ_CONSTL());
             NEXT;
         }
+        CODE(RET) {
+            
+            return VM_OK;
+        }
     }
 
     return VM_OK;

@@ -171,6 +171,14 @@ static void binary(parser_t *parser)
 
     // Emit the operator instruction.                        
     switch (operatorType) {
+        case TOKEN_EQUAL_EQUAL:   emitByte(parser, OP_EQ); break;
+        case TOKEN_LESS:          emitByte(parser, OP_LT); break;
+        case TOKEN_LESS_EQUAL:    emitByte(parser, OP_LE); break;
+
+        case TOKEN_BANG_EQUAL:    emitBytes(parser, OP_EQ, OP_NOT); break;
+        case TOKEN_GREATER:       emitBytes(parser, OP_LE, OP_NOT); break;
+        case TOKEN_GREATER_EQUAL: emitBytes(parser, OP_LT, OP_NOT); break;
+
         case TOKEN_PLUS:          emitByte(parser, OP_ADD); break;
         case TOKEN_MINUS:         emitByte(parser, OP_SUB); break;
         case TOKEN_STAR:          emitByte(parser, OP_MUL); break;
@@ -212,7 +220,8 @@ static void unary(parser_t *parser)
 
     // Emit the operator instruction.              
     switch (operatorType) {
-        case TOKEN_MINUS: emitByte(parser, OP_NEG); break;
+        case TOKEN_BANG:    emitByte(parser, OP_NOT); break;
+        case TOKEN_MINUS:   emitByte(parser, OP_NEG); break;
         default:
             return; // Unreachable.                    
     }
@@ -233,14 +242,14 @@ static rule_t rules[] = {
     { NULL,     binary,  PREC_FACTOR },     // TOKEN_SLASH           
     { NULL,     binary,  PREC_FACTOR },     // TOKEN_STAR
 
-    { NULL,     NULL,    PREC_NONE },       // TOKEN_BANG            
-    { NULL,     NULL,    PREC_NONE },       // TOKEN_BANG_EQUAL      
+    { unary,    NULL,    PREC_NONE },       // TOKEN_BANG
+    { NULL,     binary,  PREC_EQUALITY },   // TOKEN_BANG_EQUAL
     { NULL,     NULL,    PREC_NONE },       // TOKEN_EQUAL           
-    { NULL,     NULL,    PREC_NONE },       // TOKEN_EQUAL_EQUAL     
-    { NULL,     NULL,    PREC_NONE },       // TOKEN_GREATER         
-    { NULL,     NULL,    PREC_NONE },       // TOKEN_GREATER_EQUAL   
-    { NULL,     NULL,    PREC_NONE },       // TOKEN_LESS            
-    { NULL,     NULL,    PREC_NONE },       // TOKEN_LESS_EQUAL
+    { NULL,     binary,  PREC_EQUALITY },   // TOKEN_EQUAL_EQUAL  
+    { NULL,     binary,  PREC_COMPARISON }, // TOKEN_GREATER      
+    { NULL,     binary,  PREC_COMPARISON }, // TOKEN_GREATER_EQUAL
+    { NULL,     binary,  PREC_COMPARISON }, // TOKEN_LESS         
+    { NULL,     binary,  PREC_COMPARISON }, // TOKEN_LESS_EQUAL 
 
     { NULL,     NULL,    PREC_NONE },       // TOKEN_IDENTIFIER      
     { NULL,     NULL,    PREC_NONE },       // TOKEN_STRING          
