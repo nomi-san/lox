@@ -230,25 +230,25 @@ static int execute(vm_t *vm)
                 case VT_NUM_NUM: {
                     double b = AS_NUM(POP());
                     double a = AS_NUM(POP());
-                    PUSH(VAL_BOOL(a < b));
+                    PUSH(VAL_NUM(a + b));
                     break;
                 }
                 case VT_BOOL_BOOL: {
                     char b = AS_BOOL(POP());
                     char a = AS_BOOL(POP());
-                    PUSH(VAL_BOOL(a < b));
+                    PUSH(VAL_NUM(a + b));
                     break;
                 }
                 case VT_BOOL_NUM: {
                     double b = AS_NUM(POP());
                     double a = AS_BOOL(POP());
-                    PUSH(VAL_BOOL(a < b));
+                    PUSH(VAL_NUM(a + b));
                     break;
                 }
                 case VT_NUM_BOOL: {
                     double b = AS_BOOL(POP());
                     double a = AS_NUM(POP());
-                    PUSH(VAL_BOOL(a < b));
+                    PUSH(VAL_NUM(a + b));
                     break;
                 }
                 case VT_OBJ_OBJ:
@@ -267,25 +267,25 @@ static int execute(vm_t *vm)
                 case VT_NUM_NUM: {
                     double b = AS_NUM(POP());
                     double a = AS_NUM(POP());
-                    PUSH(VAL_BOOL(a - b));
+                    PUSH(VAL_NUM(a - b));
                     break;
                 }
                 case VT_BOOL_BOOL: {
                     char b = AS_BOOL(POP());
                     char a = AS_BOOL(POP());
-                    PUSH(VAL_BOOL(a - b));
+                    PUSH(VAL_NUM(a - b));
                     break;
                 }
                 case VT_BOOL_NUM: {
                     double b = AS_NUM(POP());
                     double a = AS_BOOL(POP());
-                    PUSH(VAL_BOOL(a - b));
+                    PUSH(VAL_NUM(a - b));
                     break;
                 }
                 case VT_NUM_BOOL: {
                     double b = AS_BOOL(POP());
                     double a = AS_NUM(POP());
-                    PUSH(VAL_BOOL(a - b));
+                    PUSH(VAL_NUM(a - b));
                     break;
                 }
                 default:
@@ -299,25 +299,25 @@ static int execute(vm_t *vm)
                 case VT_NUM_NUM: {
                     double b = AS_NUM(POP());
                     double a = AS_NUM(POP());
-                    PUSH(VAL_BOOL(a * b));
+                    PUSH(VAL_NUM(a * b));
                     break;
                 }
                 case VT_BOOL_BOOL: {
                     char b = AS_BOOL(POP());
                     char a = AS_BOOL(POP());
-                    PUSH(VAL_BOOL(a * b));
+                    PUSH(VAL_NUM(a * b));
                     break;
                 }
                 case VT_BOOL_NUM: {
                     double b = AS_NUM(POP());
                     double a = AS_BOOL(POP());
-                    PUSH(VAL_BOOL(a * b));
+                    PUSH(VAL_NUM(a * b));
                     break;
                 }
                 case VT_NUM_BOOL: {
                     double b = AS_BOOL(POP());
                     double a = AS_NUM(POP());
-                    PUSH(VAL_BOOL(a * b));
+                    PUSH(VAL_NUM(a * b));
                     break;
                 }
                 default:
@@ -331,25 +331,25 @@ static int execute(vm_t *vm)
                 case VT_NUM_NUM: {
                     double b = AS_NUM(POP());
                     double a = AS_NUM(POP());
-                    PUSH(VAL_BOOL(a / b));
+                    PUSH(VAL_NUM(a / b));
                     break;
                 }
                 case VT_BOOL_BOOL: {
-                    char b = AS_BOOL(POP());
-                    char a = AS_BOOL(POP());
-                    PUSH(VAL_BOOL(a / b));
+                    double b = AS_BOOL(POP());
+                    double a = AS_BOOL(POP());
+                    PUSH(VAL_NUM(a / b));
                     break;
                 }
                 case VT_BOOL_NUM: {
                     double b = AS_NUM(POP());
                     double a = AS_BOOL(POP());
-                    PUSH(VAL_BOOL(a / b));
+                    PUSH(VAL_NUM(a / b));
                     break;
                 }
                 case VT_NUM_BOOL: {
                     double b = AS_BOOL(POP());
                     double a = AS_NUM(POP());
-                    PUSH(VAL_BOOL(a / b));
+                    PUSH(VAL_NUM(a / b));
                     break;
                 }
                 default:
