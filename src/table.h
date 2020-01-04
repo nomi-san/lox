@@ -13,3 +13,6 @@ typedef struct {
     int capacity;
     ent_t *entries;
 } tab_t;
+
+void tab_init(tab_t *table);
+void tab_free(tab_t *table);
