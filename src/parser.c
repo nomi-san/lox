@@ -161,17 +161,26 @@ static uint16_t makeConstant(parser_t *parser, val_t value)
     return (uint16_t)constant;
 }
 
+static void emitBytesAndConstLong(parser_t *parser, uint8_t op, int arg)
+{
+#define CHANGE(x)   (op == x) op = x##L
+    if (arg > UINT8_MAX) {
+        if CHANGE(OP_GLD);
+        if CHANGE(OP_GST);
+        if CHANGE(OP_DEF);
+        if CHANGE(OP_CONST);
+        emitByte(parser, op);
+        emitBytes(parser, (arg >> 8) & 0xFF, arg & 0xFF);
+        return;
+    }
+#undef CHANGE
+    emitBytes(parser, op, (uint8_t)arg);
+}
+
 static void emitConstant(parser_t *parser, val_t value)
 {
     uint16_t constant = makeConstant(parser, value);
-
-    if (constant > UINT8_MAX) {
-        emitByte(parser, OP_CONSTL);
-        emitBytes(parser, (constant >> 8) & 0xFF, constant & 0xFF);
-        return;
-    }
-
-    emitBytes(parser, OP_CONST, (uint8_t)constant);
+    emitBytesAndConstLong(parser, OP_CONST, constant);
 }
 
 static void initCompiler(parser_t *parser, compiler_t *compiler)
@@ -229,6 +238,21 @@ static bool identifiersEqual(tok_t *a, tok_t *b)
     return memcmp(a->start, b->start, a->length) == 0;
 }
 
+static int resolveLocal(parser_t *parser, compiler_t *compiler, tok_t *name)
+{
+    for (int i = compiler->localCount - 1; i >= 0; i--) {
+        local_t *local = &compiler->locals[i];
+        if (identifiersEqual(name, &local->name)) {
+            if (local->depth == -1) {
+                error(parser, "Cannot read local variable in its own initializer.");
+            }
+            return i;
+        }
+    }
+
+    return -1;
+}
+
 static void addLocal(parser_t *parser, tok_t name)
 {
     compiler_t *current = parser->compiler;
@@ -240,7 +264,7 @@ static void addLocal(parser_t *parser, tok_t name)
 
     local_t *local = &current->locals[current->localCount++];
     local->name = name;
-    local->depth = current->scopeDepth;
+    local->depth = -1;
 }
 
 static void declareVariable(parser_t *parser)
@@ -275,19 +299,21 @@ static uint16_t parseVariable(parser_t *parser, const char *errorMessage)
     return identifierConstant(parser, &parser->previous);
 }
 
+static void markInitialized(parser_t *parser)
+{
+    compiler_t *current = parser->compiler;
+    current->locals[current->localCount - 1].depth =
+        current->scopeDepth;
+}
+
 static void defineVariable(parser_t *parser, uint16_t global)
 {
     if (parser->compiler->scopeDepth > 0) {
+        markInitialized(parser);
         return;
     }
 
-    if (global > UINT8_MAX) {
-        emitByte(parser, OP_DEFL);
-        emitBytes(parser, (global >> 8) & 0xFF, global & 0xFF);
-        return;
-    }
-
-    emitBytes(parser, OP_DEF, (uint8_t)global);
+    emitBytesAndConstLong(parser, OP_DEF, global);
 }
 
 static void binary(parser_t *parser, bool canAssign)
@@ -351,26 +377,25 @@ static void string(parser_t *parser, bool canAssign)
 
 static void namedVariable(parser_t *parser, tok_t name, bool canAssign)
 {
-    uint16_t arg = identifierConstant(parser, &name);
+    uint8_t getOp, setOp;
+    int arg = resolveLocal(parser, parser->compiler, &name);
+
+    if (arg != -1) {
+        getOp = OP_LD;
+        setOp = OP_ST;
+    }
+    else {
+        arg = identifierConstant(parser, &name);
+        getOp = OP_GLD;
+        setOp = OP_GST;
+    }
 
     if (canAssign && match(parser, TOKEN_EQUAL)) {
         expression(parser);
-        if (arg > UINT8_MAX) {
-            emitByte(parser, OP_GSTL);
-            emitBytes(parser, (arg >> 8) & 0xFF, arg & 0xFF);
-            return;
-        }
-
-        emitBytes(parser, OP_GST, (uint8_t)arg);
+        emitBytesAndConstLong(parser, setOp, arg);
     }
     else {
-        if (arg > UINT8_MAX) {
-            emitByte(parser, OP_GLDL);
-            emitBytes(parser, (arg >> 8) & 0xFF, arg & 0xFF);
-            return;
-        }
-
-        emitBytes(parser, OP_GLD, (uint8_t)arg);
+        emitBytesAndConstLong(parser, getOp, arg);
     }
 }
 

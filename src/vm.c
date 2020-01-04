@@ -76,6 +76,8 @@ static void concatenate(vm_t *vm)
 static int execute(vm_t *vm)
 {
 
+#define STACK           (vm->stack)
+
 #define PREV_BYTE()     (vm->ip[-1])
 #define READ_BYTE()     *(vm->ip++)
 #define READ_SHORT()    (vm->ip += 2, (uint16_t)((vm->ip[-2] << 8) | vm->ip[-1]))
@@ -393,6 +395,16 @@ static int execute(vm_t *vm)
                 tab_remove(&vm->globals, name);
                 ERROR("Undefined variable '%s'.", name->chars);
             }
+            NEXT;
+        }
+
+        CODE(LD) {
+            PUSH(STACK[READ_BYTE()]);
+            NEXT;
+        }
+
+        CODE(ST) {
+            STACK[READ_BYTE()] = PEEK(0);
             NEXT;
         }
 
