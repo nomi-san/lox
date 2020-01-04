@@ -5,6 +5,7 @@
 
 #include "vm.h"
 #include "value.h"
+#include "parser.h"
 
 vm_t *vm_create()
 {
@@ -36,7 +37,7 @@ int do_string(vm_t *vm, const char *source)
     chunk_t chunk;
     chunk_init(&chunk);
 
-    if (!compile(source, &chunk)) {
+    if (!compile(vm, source, &chunk)) {
         chunk_free(&chunk);
         return VM_COMPILE_ERROR;
     }
