@@ -5,6 +5,7 @@
 
 typedef struct {
     size_t allocated;
+    size_t next;
     obj_t *objects;
 } gc_t;
 
