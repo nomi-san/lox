@@ -99,21 +99,27 @@ static void emitReturn(parser_t *parser)
     emitByte(parser, OP_RET);
 }
 
-static uint8_t makeConstant(parser_t *parser, val_t value)
+static uint16_t makeConstant(parser_t *parser, val_t value)
 {
     int constant = arr_add(&currentChunk(parser)->constants, value, false);
-    if (constant > UINT8_MAX) {
+    if (constant > UINT16_MAX) {
         error(parser, "Too many constants in one chunk.");
         return 0;
     }
 
-    return (uint8_t)constant;
+    return (uint16_t)constant;
 }
 
 static void emitConstant(parser_t *parser, val_t value)
 {
-    uint8_t constant = makeConstant(parser, value);
-    emitBytes(parser, OP_CONST, constant);
+    uint16_t constant = makeConstant(parser, value);
+
+    if (constant > UINT8_MAX) {
+
+        return;
+    }
+
+    emitBytes(parser, OP_CONST, (uint8_t)constant);
 }
 
 static void endCompiler(parser_t *parser)
