@@ -17,7 +17,7 @@ void val_print(val_t value)
             printf("%.14g", AS_NUM(value));
             break;
         case VT_OBJ:
-            obj_print(value);
+            obj_print(AS_OBJ(value));
             break;
     }
 }

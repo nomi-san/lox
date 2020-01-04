@@ -27,4 +27,5 @@ static inline bool obj_is(val_t value, otype_t type) {
 
 str_t *str_copy(vm_t *vm, const char *chars, int length);
 
-void obj_print(val_t value);
+void obj_print(obj_t *object);
+void obj_free(vm_t *vm, obj_t *object);
