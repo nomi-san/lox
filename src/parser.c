@@ -86,6 +86,14 @@ static void emitBytes(parser_t *parser, uint8_t byte1, uint8_t byte2)
     emitByte(parser, byte2);
 }
 
+static void emitNBytes(parser_t *parser, void *bytes, size_t size)
+{
+    const uint8_t *bs = bytes;
+    for (size_t i = 0; i < size; i++) {
+        emitByte(parser, bytes == NULL ? 0 : bs[i]);
+    }
+}
+
 static void emitReturn(parser_t *parser)
 {
     emitByte(parser, OP_RET);
