@@ -6,7 +6,7 @@
 #include "parser.h"
 #include "lexer.h"
 
-bool compile(vm_t *vm, const char *source, chunk_t *chunk)
+bool compile(vm_t *vm, const char *fname, const char *source, chunk_t *chunk)
 {
 
 }

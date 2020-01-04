@@ -37,7 +37,7 @@ int do_string(vm_t *vm, const char *source)
     chunk_t chunk;
     chunk_init(&chunk);
 
-    if (!compile(vm, source, &chunk)) {
+    if (!compile(vm, NULL, source, &chunk)) {
         chunk_free(&chunk);
         return VM_COMPILE_ERROR;
     }
