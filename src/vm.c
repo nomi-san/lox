@@ -36,6 +36,7 @@ vm_t *vm_create()
     memset(vm, '\0', sizeof(vm_t));
 
     gc_init(&vm->gc);
+    tab_init(&vm->globals);
     tab_init(&vm->strings);
 
     resetStack(vm);
@@ -46,6 +47,7 @@ void vm_close(vm_t *vm)
 {
     if (vm == NULL) return;
 
+    tab_free(&vm->globals);
     tab_free(&vm->strings);
     gc_free(&vm->gc);
 
@@ -80,6 +82,8 @@ static int execute(vm_t *vm)
 
 #define READ_CONST()    (vm)->chunk->constants.values[READ_BYTE()]
 #define READ_CONSTL()   (vm)->chunk->constants.values[READ_SHORT()]
+#define READ_STR()      AS_STR(READ_CONST())
+#define READ_STRL()     AS_STR(READ_CONSTL())
 
 #define ERROR(fmt, ...) do { runtimeError(vm, fmt, ##__VA_ARGS__); return VM_RUNTIME_ERROR; } while (0)
 
@@ -347,6 +351,13 @@ static int execute(vm_t *vm)
                     ERROR("Operands must be two numbers/booleans.");
             }
             NEXT;
+        }
+
+        CODE(DEF) {
+            str_t *name = READ_STR();
+            tab_set(&vm->globals, name, PEEK(0));
+            POP();
+            break;
         }
 
         CODE_ERR() {

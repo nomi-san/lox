@@ -14,6 +14,7 @@ struct _vm {
 
     gc_t gc;
     tab_t strings;
+    tab_t globals;
 };
 
 vm_t *vm_create();
