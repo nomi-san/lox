@@ -31,16 +31,14 @@ static void runtimeError(vm_t *vm, const char *format, ...)
 vm_t *vm_create()
 {
     vm_t *vm = malloc(sizeof(vm_t));
+    if (vm == NULL) return NULL;
 
-    if (vm != NULL) {
-        memset(vm, '\0', sizeof(vm_t));
+    memset(vm, '\0', sizeof(vm_t));
 
-        gc_init(&vm->gc);
-        tab_init(&vm->strings);
+    gc_init(&vm->gc);
+    tab_init(&vm->strings);
 
-        resetStack(vm);
-    }
-
+    resetStack(vm);
     return vm;
 }
 
@@ -92,6 +90,12 @@ static int execute(vm_t *vm)
 
     INTERPRET
     {
+        CODE(PRINT) {
+            val_print(POP());
+            printf("\n");
+            NEXT;
+        }
+
         CODE(NIL) {
             PUSH(VAL_NIL);
             NEXT;

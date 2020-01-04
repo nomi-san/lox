@@ -97,6 +97,18 @@ static void consume(parser_t *parser, toktype_t type, const char* message)
     errorAtCurrent(parser, message);
 }
 
+static bool check(parser_t *parser, toktype_t type)
+{
+    return parser->current.type == type;
+}
+
+static bool match(parser_t *parser, toktype_t type)
+{
+    if (!check(parser, type)) return false;
+    advance(parser);
+    return true;
+}
+
 static void emitByte(parser_t *parser, uint8_t byte)
 {
     chunk_emit(currentChunk(parser), byte,
@@ -158,6 +170,8 @@ static void endCompiler(parser_t *parser)
 }
 
 static void expression(parser_t *parser);
+static void statement(parser_t *parser);
+static void declaration(parser_t *parser);
 static rule_t *getRule(toktype_t type);
 static void parsePrecedence(parser_t *parser, prec_t precedence);
 
@@ -313,6 +327,26 @@ static void expression(parser_t *parser)
     parsePrecedence(parser, PREC_ASSIGNMENT);
 }
 
+static void printStatement(parser_t *parser)
+{
+    expression(parser);
+    consume(parser, TOKEN_SEMICOLON, "Expect ';' after value.");
+
+    emitByte(parser, OP_PRINT);
+}
+
+static void declaration(parser_t *parser)
+{
+    statement(parser);
+}
+
+static void statement(parser_t *parser)
+{
+    if (match(parser, TOKEN_PRINT)) {
+        printStatement(parser);
+    }
+}
+
 bool compile(vm_t *vm, const char *fname, const char *source, chunk_t *chunk)
 {
     lexer_t lexer;
@@ -326,8 +360,9 @@ bool compile(vm_t *vm, const char *fname, const char *source, chunk_t *chunk)
     parser.panicMode = false;
     
     advance(&parser);
-    expression(&parser);
-    consume(&parser, TOKEN_EOF, "Expect end of expression.");
+    while (!match(&parser, TOKEN_EOF)) {
+        declaration(&parser);
+    }
 
     endCompiler(&parser);
     return !parser.hadError;
