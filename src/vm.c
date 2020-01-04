@@ -115,12 +115,45 @@ static int execute(vm_t *vm)
             NEXT;
         }
 
+        CODE(NEG) {
+            if (IS_NUM(PEEK(0))) {
+                double n = AS_NUM(POP());
+                PUSH(VAL_NUM(-n));
+            } else {
+                ERROR("Operands must be a number.");                             
+            }
+            NEXT;
+        }
+
         CODE(EQ) {
             val_t b = POP();
             val_t a = POP();
             PUSH(VAL_BOOL(val_equal(a, b)));
             NEXT;
         }
+
+        CODE(LT) {
+            if (IS_NUM(PEEK(0)) && IS_NUM(PEEK(1))) {
+                double b = AS_NUM(POP());
+                double a = AS_NUM(POP());
+                PUSH(VAL_NUM(a < b));
+            } else {
+                ERROR("Operands must be two numbers.");                             
+            }
+            NEXT;
+        }
+
+        CODE(LE) {
+            if (IS_NUM(PEEK(0)) && IS_NUM(PEEK(1))) {
+                double b = AS_NUM(POP());
+                double a = AS_NUM(POP());
+                PUSH(VAL_NUM(a <= b));
+            } else {
+                ERROR("Operands must be two numbers.");                             
+            }
+            NEXT;
+        }
+
         CODE(ADD) {
             if (IS_STR(PEEK(0)) && IS_STR(PEEK(1))) {                
                 concatenate(vm);                                               
@@ -130,6 +163,39 @@ static int execute(vm_t *vm)
                 PUSH(VAL_NUM(a + b));                                     
             } else {
                 ERROR("Operands must be two numbers or two strings.");                             
+            }
+            NEXT;
+        }
+
+        CODE(SUB) {
+            if (IS_NUM(PEEK(0)) && IS_NUM(PEEK(1))) {
+                double b = AS_NUM(POP());
+                double a = AS_NUM(POP());
+                PUSH(VAL_NUM(a - b));
+            } else {
+                ERROR("Operands must be two numbers.");                             
+            }
+            NEXT;
+        }
+
+        CODE(MUL) {
+            if (IS_NUM(PEEK(0)) && IS_NUM(PEEK(1))) {
+                double b = AS_NUM(POP());
+                double a = AS_NUM(POP());
+                PUSH(VAL_NUM(a * b));
+            } else {
+                ERROR("Operands must be two numbers.");                             
+            }
+            NEXT;
+        }
+
+        CODE(DIV) {
+            if (IS_NUM(PEEK(0)) && IS_NUM(PEEK(1))) {
+                double b = AS_NUM(POP());
+                double a = AS_NUM(POP());
+                PUSH(VAL_NUM(a / b));
+            } else {
+                ERROR("Operands must be two numbers.");                             
             }
             NEXT;
         }
