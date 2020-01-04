@@ -2,6 +2,7 @@
 #include <stdlib.h>
 
 #include "value.h"
+#include "object.h"
 
 void val_print(val_t value)
 {
@@ -16,7 +17,7 @@ void val_print(val_t value)
             printf("%.14g", AS_NUM(value));
             break;
         case VT_OBJ:
-            // todo
+            obj_print(value);
             break;
     }
 }
