@@ -8,4 +8,4 @@ typedef struct {
     obj_t *objects;
 } gc_t;
 
-void *gc_realloc();
+void *gc_realloc(gc_t *gc, void *ptr, size_t old, size_t new);
