@@ -31,7 +31,7 @@ typedef enum {
     PREC_PRIMARY
 } prec_t;
 
-typedef void (* parsefn_t)(parser_t *parser);
+typedef void (* parsefn_t)(parser_t *parser, bool canAssign);
 
 typedef struct {
     parsefn_t prefix;
@@ -198,7 +198,7 @@ static void defineVariable(parser_t *parser, uint16_t global)
     emitBytes(parser, OP_DEF, (uint8_t)global);
 }
 
-static void binary(parser_t *parser)
+static void binary(parser_t *parser, bool canAssign)
 {
     // Remember the operator.                                
     toktype_t operatorType = parser->previous.type;
@@ -226,7 +226,7 @@ static void binary(parser_t *parser)
     }
 }
 
-static void literal(parser_t *parser)
+static void literal(parser_t *parser, bool canAssign)
 {
     switch (parser->previous.type) {
         case TOKEN_FALSE:   emitByte(parser, OP_FALSE); break;
@@ -237,19 +237,19 @@ static void literal(parser_t *parser)
     }
 }
 
-static void grouping(parser_t *parser)
+static void grouping(parser_t *parser, bool canAssign)
 {
     expression(parser);
     consume(parser, TOKEN_RIGHT_PAREN, "Expect ')' after expression.");
 }
 
-static void number(parser_t *parser)
+static void number(parser_t *parser, bool canAssign)
 {
     double n = strtod(parser->previous.start, NULL);
     emitConstant(parser, VAL_NUM(n));
 }
 
-static void string(parser_t *parser)
+static void string(parser_t *parser, bool canAssign)
 {
     str_t *s = str_copy(parser->vm,
         parser->previous.start + 1, parser->previous.length - 2);
@@ -257,18 +257,37 @@ static void string(parser_t *parser)
     emitConstant(parser, VAL_OBJ(s));
 }
 
-static void namedVariable(parser_t *parser, tok_t name)
+static void namedVariable(parser_t *parser, tok_t name, bool canAssign)
 {
     uint16_t arg = identifierConstant(parser, &name);
-    emitBytes(parser, OP_GLD, arg);
+
+    if (canAssign && match(parser, TOKEN_EQUAL)) {
+        expression(parser);
+        if (arg > UINT8_MAX) {
+            emitByte(parser, OP_GSTL);
+            emitBytes(parser, (arg >> 8) & 0xFF, arg & 0xFF);
+            return;
+        }
+
+        emitBytes(parser, OP_GST, (uint8_t)arg);
+    }
+    else {
+        if (arg > UINT8_MAX) {
+            emitByte(parser, OP_GLDL);
+            emitBytes(parser, (arg >> 8) & 0xFF, arg & 0xFF);
+            return;
+        }
+
+        emitBytes(parser, OP_GLD, (uint8_t)arg);
+    }
 }
 
-static void variable(parser_t *parser)
+static void variable(parser_t *parser, bool canAssign)
 {
-    namedVariable(parser, parser->previous);
+    namedVariable(parser, parser->previous, canAssign);
 }
 
-static void unary(parser_t *parser)
+static void unary(parser_t *parser, bool canAssign)
 {
     toktype_t operatorType = parser->previous.type;
 
@@ -342,12 +361,17 @@ static void parsePrecedence(parser_t *parser, prec_t precedence)
         return;
     }
 
-    prefixRule(parser);
+    bool canAssign = precedence <= PREC_ASSIGNMENT;
+    prefixRule(parser, canAssign);
 
     while (precedence <= getRule(parser->current.type)->precedence) {
         advance(parser);
         parsefn_t infixRule = getRule(parser->previous.type)->infix;
-        infixRule(parser);
+        infixRule(parser, canAssign);
+    }
+
+    if (canAssign && match(parser, TOKEN_EQUAL)) {
+        error(parser, "Invalid assignment target.");
     }
 }
 

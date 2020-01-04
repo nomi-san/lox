@@ -383,6 +383,19 @@ static int execute(vm_t *vm)
             NEXT;
         }
 
+        CODE(GSTL) {
+            str_t *name = READ_STRL();
+            goto _gst;
+        CODE(GST)
+            name = READ_STR();
+        _gst:
+            if (tab_set(&vm->globals, name, PEEK(0))) {
+                tab_remove(&vm->globals, name);
+                ERROR("Undefined variable '%s'.", name->chars);
+            }
+            NEXT;
+        }
+
         CODE_ERR() {
             ERROR("Bad opcode, got %d!", PREV_BYTE());
         }
