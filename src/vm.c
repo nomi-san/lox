@@ -131,7 +131,7 @@ static int execute(vm_t *vm)
                     PUSH(VAL_NUM(-AS_NUM(POP())));
                     break;
                 default:
-                    ERROR("Operands must be a number or boolean.");
+                    ERROR("Operands must be a number/boolean.");
             }
             NEXT;
         }
@@ -144,69 +144,198 @@ static int execute(vm_t *vm)
         }
 
         CODE(LT) {
-            if (IS_NUM(PEEK(0)) && IS_NUM(PEEK(1))) {
-                double b = AS_NUM(POP());
-                double a = AS_NUM(POP());
-                PUSH(VAL_NUM(a < b));
-            } else {
-                ERROR("Operands must be two numbers.");                             
+            switch (CMB_BYTES(AS_TYPE(PEEK(1)), AS_TYPE(PEEK(0)))) {
+                case VT_NUM_NUM: {
+                    double b = AS_NUM(POP());
+                    double a = AS_NUM(POP());
+                    PUSH(VAL_BOOL(a < b));
+                    break;
+                }
+                case VT_BOOL_BOOL: {
+                    char b = AS_BOOL(POP());
+                    char a = AS_BOOL(POP());
+                    PUSH(VAL_BOOL(a < b));
+                    break;
+                }
+                case VT_BOOL_NUM: {
+                    double b = AS_NUM(POP());
+                    double a = AS_BOOL(POP());
+                    PUSH(VAL_BOOL(a < b));
+                    break;
+                }
+                case VT_NUM_BOOL: {
+                    double b = AS_BOOL(POP());
+                    double a = AS_NUM(POP());
+                    PUSH(VAL_BOOL(a < b));
+                    break;
+                }
+                default:
+                    ERROR("Operands must be two numbers/booleans.");
             }
             NEXT;
         }
 
         CODE(LE) {
-            if (IS_NUM(PEEK(0)) && IS_NUM(PEEK(1))) {
-                double b = AS_NUM(POP());
-                double a = AS_NUM(POP());
-                PUSH(VAL_NUM(a <= b));
-            } else {
-                ERROR("Operands must be two numbers.");                             
+            switch (CMB_BYTES(AS_TYPE(PEEK(1)), AS_TYPE(PEEK(0)))) {
+                case VT_NUM_NUM: {
+                    double b = AS_NUM(POP());
+                    double a = AS_NUM(POP());
+                    PUSH(VAL_BOOL(a <= b));
+                    break;
+                }
+                case VT_BOOL_BOOL: {
+                    char b = AS_BOOL(POP());
+                    char a = AS_BOOL(POP());
+                    PUSH(VAL_BOOL(a <= b));
+                    break;
+                }
+                case VT_BOOL_NUM: {
+                    double b = AS_NUM(POP());
+                    double a = AS_BOOL(POP());
+                    PUSH(VAL_BOOL(a <= b));
+                    break;
+                }
+                case VT_NUM_BOOL: {
+                    double b = AS_BOOL(POP());
+                    double a = AS_NUM(POP());
+                    PUSH(VAL_BOOL(a <= b));
+                    break;
+                }
+                default:
+                    ERROR("Operands must be two numbers/booleans.");
             }
             NEXT;
         }
 
         CODE(ADD) {
-            if (IS_STR(PEEK(0)) && IS_STR(PEEK(1))) {                
-                concatenate(vm);                                               
-            } else if (IS_NUM(PEEK(0)) && IS_NUM(PEEK(1))) {
-                double b = AS_NUM(POP());                                 
-                double a = AS_NUM(POP());                                 
-                PUSH(VAL_NUM(a + b));                                     
-            } else {
-                ERROR("Operands must be two numbers or two strings.");                             
+            switch (CMB_BYTES(AS_TYPE(PEEK(1)), AS_TYPE(PEEK(0)))) {
+                case VT_NUM_NUM: {
+                    double b = AS_NUM(POP());
+                    double a = AS_NUM(POP());
+                    PUSH(VAL_BOOL(a < b));
+                    break;
+                }
+                case VT_BOOL_BOOL: {
+                    char b = AS_BOOL(POP());
+                    char a = AS_BOOL(POP());
+                    PUSH(VAL_BOOL(a < b));
+                    break;
+                }
+                case VT_BOOL_NUM: {
+                    double b = AS_NUM(POP());
+                    double a = AS_BOOL(POP());
+                    PUSH(VAL_BOOL(a < b));
+                    break;
+                }
+                case VT_NUM_BOOL: {
+                    double b = AS_BOOL(POP());
+                    double a = AS_NUM(POP());
+                    PUSH(VAL_BOOL(a < b));
+                    break;
+                }
+                case VT_OBJ_OBJ:
+                    if (IS_STR(PEEK(0)) && IS_STR(PEEK(1))) {
+                        concatenate(vm);
+                        break;
+                    }
+                default:
+                    ERROR("Operands must be two numbers/booleans/strings.");
             }
             NEXT;
         }
 
         CODE(SUB) {
-            if (IS_NUM(PEEK(0)) && IS_NUM(PEEK(1))) {
-                double b = AS_NUM(POP());
-                double a = AS_NUM(POP());
-                PUSH(VAL_NUM(a - b));
-            } else {
-                ERROR("Operands must be two numbers.");                             
+            switch (CMB_BYTES(AS_TYPE(PEEK(1)), AS_TYPE(PEEK(0)))) {
+                case VT_NUM_NUM: {
+                    double b = AS_NUM(POP());
+                    double a = AS_NUM(POP());
+                    PUSH(VAL_BOOL(a - b));
+                    break;
+                }
+                case VT_BOOL_BOOL: {
+                    char b = AS_BOOL(POP());
+                    char a = AS_BOOL(POP());
+                    PUSH(VAL_BOOL(a - b));
+                    break;
+                }
+                case VT_BOOL_NUM: {
+                    double b = AS_NUM(POP());
+                    double a = AS_BOOL(POP());
+                    PUSH(VAL_BOOL(a - b));
+                    break;
+                }
+                case VT_NUM_BOOL: {
+                    double b = AS_BOOL(POP());
+                    double a = AS_NUM(POP());
+                    PUSH(VAL_BOOL(a - b));
+                    break;
+                }
+                default:
+                    ERROR("Operands must be two numbers/booleans.");
             }
             NEXT;
         }
 
         CODE(MUL) {
-            if (IS_NUM(PEEK(0)) && IS_NUM(PEEK(1))) {
-                double b = AS_NUM(POP());
-                double a = AS_NUM(POP());
-                PUSH(VAL_NUM(a * b));
-            } else {
-                ERROR("Operands must be two numbers.");                             
+            switch (CMB_BYTES(AS_TYPE(PEEK(1)), AS_TYPE(PEEK(0)))) {
+                case VT_NUM_NUM: {
+                    double b = AS_NUM(POP());
+                    double a = AS_NUM(POP());
+                    PUSH(VAL_BOOL(a * b));
+                    break;
+                }
+                case VT_BOOL_BOOL: {
+                    char b = AS_BOOL(POP());
+                    char a = AS_BOOL(POP());
+                    PUSH(VAL_BOOL(a * b));
+                    break;
+                }
+                case VT_BOOL_NUM: {
+                    double b = AS_NUM(POP());
+                    double a = AS_BOOL(POP());
+                    PUSH(VAL_BOOL(a * b));
+                    break;
+                }
+                case VT_NUM_BOOL: {
+                    double b = AS_BOOL(POP());
+                    double a = AS_NUM(POP());
+                    PUSH(VAL_BOOL(a * b));
+                    break;
+                }
+                default:
+                    ERROR("Operands must be two numbers/booleans.");
             }
             NEXT;
         }
 
         CODE(DIV) {
-            if (IS_NUM(PEEK(0)) && IS_NUM(PEEK(1))) {
-                double b = AS_NUM(POP());
-                double a = AS_NUM(POP());
-                PUSH(VAL_NUM(a / b));
-            } else {
-                ERROR("Operands must be two numbers.");                             
+            switch (CMB_BYTES(AS_TYPE(PEEK(1)), AS_TYPE(PEEK(0)))) {
+                case VT_NUM_NUM: {
+                    double b = AS_NUM(POP());
+                    double a = AS_NUM(POP());
+                    PUSH(VAL_BOOL(a / b));
+                    break;
+                }
+                case VT_BOOL_BOOL: {
+                    char b = AS_BOOL(POP());
+                    char a = AS_BOOL(POP());
+                    PUSH(VAL_BOOL(a / b));
+                    break;
+                }
+                case VT_BOOL_NUM: {
+                    double b = AS_NUM(POP());
+                    double a = AS_BOOL(POP());
+                    PUSH(VAL_BOOL(a / b));
+                    break;
+                }
+                case VT_NUM_BOOL: {
+                    double b = AS_BOOL(POP());
+                    double a = AS_NUM(POP());
+                    PUSH(VAL_BOOL(a / b));
+                    break;
+                }
+                default:
+                    ERROR("Operands must be two numbers/booleans.");
             }
             NEXT;
         }
