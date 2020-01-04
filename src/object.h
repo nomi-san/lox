@@ -19,6 +19,8 @@ struct _str {
 
 #define OBJ_TYPE(v)     (AS_OBJ(v)->type)
 
+#define IS_STR(v)       (OBJ_TYPE(v) == OT_STR)
+
 static inline bool obj_is(val_t value, otype_t type) {
     return IS_OBJ(value) && OBJ_TYPE(value) == type;
 }

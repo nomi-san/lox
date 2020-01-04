@@ -6,6 +6,7 @@
 #include "vm.h"
 #include "value.h"
 #include "parser.h"
+#include "object.h"
 
 static void resetStack(vm_t *vm)
 {
@@ -46,8 +47,24 @@ void vm_close(vm_t *vm)
     free(vm);
 }
 
-#define PUSH(vm, v)    *((vm)->top++) = (v)
-#define POP(vm)        *(--(vm)->top)
+#define PUSH(v)     *((vm)->top++) = (v)
+#define POP()       *(--(vm)->top)
+#define PEEK(i)     ((vm)->top[-1 - (i)])
+
+static void concatenate(vm_t *vm)
+{
+    str_t *b = AS_STR(POP());
+    str_t *a = AS_STR(POP());
+
+    int length = a->length + b->length;
+    char *chars = malloc((length + 1) * sizeof(char));
+    memcpy(chars, a->chars, a->length);
+    memcpy(chars + a->length, b->chars, b->length);
+    chars[length] = '\0';
+
+    str_t *result = str_take(vm, chars, length);
+    PUSH(VAL_OBJ(result));
+}
 
 static int execute(vm_t *vm)
 {
@@ -69,23 +86,23 @@ static int execute(vm_t *vm)
     INTERPRET
     {
         CODE(NIL) {
-            PUSH(vm, VAL_NIL);
+            PUSH(VAL_NIL);
             NEXT;
         }
         CODE(TRUE) {
-            PUSH(vm, VAL_TRUE);
+            PUSH(VAL_TRUE);
             NEXT;
         }
         CODE(FALSE) {
-            PUSH(vm, VAL_FALSE);
+            PUSH(VAL_FALSE);
             NEXT;
         }
         CODE(CONST) {
-            PUSH(vm, READ_CONST());
+            PUSH(READ_CONST());
             NEXT;
         }
         CODE(CONSTL) {
-            PUSH(vm, READ_CONSTL());
+            PUSH(READ_CONSTL());
             NEXT;
         }
         CODE(RET) {
@@ -94,14 +111,26 @@ static int execute(vm_t *vm)
         }
 
         CODE(NOT) {
-            PUSH(vm, VAL_BOOL(IS_FALSEY(POP(vm))));
+            PUSH(VAL_BOOL(IS_FALSEY(POP(vm))));
             NEXT;
         }
 
         CODE(EQ) {
-            val_t b = POP(vm);
-            val_t a = POP(vm);
-            PUSH(vm, VAL_BOOL(val_equal(a, b)));
+            val_t b = POP();
+            val_t a = POP();
+            PUSH(VAL_BOOL(val_equal(a, b)));
+            NEXT;
+        }
+        CODE(ADD) {
+            if (IS_STR(PEEK(0)) && IS_STR(PEEK(1))) {                
+                concatenate(vm);                                               
+            } else if (IS_NUM(PEEK(0)) && IS_NUM(PEEK(1))) {
+                double b = AS_NUM(POP());                                 
+                double a = AS_NUM(POP());                                 
+                PUSH(VAL_NUM(a + b));                                     
+            } else {
+                ERROR("Operands must be two numbers or two strings.");                             
+            }
             NEXT;
         }
 
