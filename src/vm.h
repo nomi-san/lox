@@ -5,6 +5,8 @@
 #include "chunk.h"
 
 struct _vm {
+    uint8_t *ip;
+    chunk_t *chunk;
     val_t *top;
     val_t stack[STACK_MAX];
 };
