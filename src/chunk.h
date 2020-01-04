@@ -31,6 +31,8 @@ typedef enum {
     OP_GSTL,    /* [k, k]   [-0, +0]    */
     OP_LD,      /* []       [-0, +1]    */
     OP_ST,      /* []       [-0, +0]    */
+    OP_JMP,     /* []       [-0, +0]    */
+    OP_JMPF,    /* []       [-1, +0]    */
 } opcode_t;
 
 typedef struct {

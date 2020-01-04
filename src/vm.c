@@ -408,6 +408,18 @@ static int execute(vm_t *vm)
             NEXT;
         }
 
+        CODE(JMP) {
+            uint16_t offset = READ_SHORT();
+            vm->ip += offset;
+            NEXT;
+        }
+
+        CODE(JMPF) {
+            uint16_t offset = READ_SHORT();
+            if (IS_FALSEY(PEEK(0))) vm->ip += offset;
+            NEXT;
+        }
+
         CODE_ERR() {
             ERROR("Bad opcode, got %d!", PREV_BYTE());
         }

@@ -145,6 +145,13 @@ static void emitNBytes(parser_t *parser, void *bytes, size_t size)
     }
 }
 
+static int emitJump(parser_t *parser, uint8_t instruction)
+{
+    emitByte(parser, instruction);
+    emitBytes(parser, 0, 0);
+    return currentChunk(parser)->count - 2;
+}
+
 static void emitReturn(parser_t *parser)
 {
     emitByte(parser, OP_RET);
@@ -181,6 +188,19 @@ static void emitConstant(parser_t *parser, val_t value)
 {
     uint16_t constant = makeConstant(parser, value);
     emitBytesAndConstLong(parser, OP_CONST, constant);
+}
+
+static void patchJump(parser_t *parser, int offset)
+{
+    // -2 to adjust for the bytecode for the jump offset itself.
+    int jump = currentChunk(parser)->count - offset - 2;
+
+    if (jump > UINT16_MAX) {
+        error(parser, "Too much code to jump over.");
+    }
+
+    currentChunk(parser)->code[offset] = (jump >> 8) & 0xff;
+    currentChunk(parser)->code[offset + 1] = jump & 0xff;
 }
 
 static void initCompiler(parser_t *parser, compiler_t *compiler)
@@ -534,6 +554,25 @@ static void expressionStatement(parser_t *parser)
     emitByte(parser, OP_POP);
 }
 
+static void ifStatement(parser_t *parser)
+{
+    consume(parser, TOKEN_LEFT_PAREN, "Expect '(' after 'if'.");
+    expression(parser);
+    consume(parser, TOKEN_RIGHT_PAREN, "Expect ')' after condition.");
+
+    int thenJump = emitJump(parser, OP_JMPF);
+    emitByte(parser, OP_POP);
+    statement(parser);
+
+    int elseJump = emitJump(parser, OP_JMP);
+
+    patchJump(parser, thenJump);
+    emitByte(parser, OP_POP);
+
+    if (match(parser, TOKEN_ELSE)) statement(parser);
+    patchJump(parser, elseJump);
+}
+
 static void printStatement(parser_t *parser)
 {
     expression(parser);
@@ -582,6 +621,9 @@ static void statement(parser_t *parser)
 {
     if (match(parser, TOKEN_PRINT)) {
         printStatement(parser);
+    }
+    else if (match(parser, TOKEN_IF)) {
+        ifStatement(parser);
     }
     else if (match(parser, TOKEN_LEFT_BRACE)) {
         beginScope(parser);
