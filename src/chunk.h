@@ -4,14 +4,31 @@
 #include "value.h"
 
 typedef enum {
+
+    OP_CALL,
     OP_RET,
     OP_PRINT,
+
     OP_POP,
+
     OP_NIL,
     OP_TRUE,
     OP_FALSE,
     OP_CONST,
     OP_CONSTL,
+
+    OP_NEG,
+    OP_NOT,
+
+    OP_LT,
+    OP_LE,
+    OP_EQ,
+
+    OP_ADD,
+    OP_SUB,
+    OP_MUL,
+    OP_DIV,
+
 } opcode_t;
 
 typedef struct {
