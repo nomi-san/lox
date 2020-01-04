@@ -336,6 +336,16 @@ static void defineVariable(parser_t *parser, uint16_t global)
     emitBytesAndConstLong(parser, OP_DEF, global);
 }
 
+static void and_(parser_t *parser, bool canAssign)
+{
+    int endJump = emitJump(parser, OP_JMPF);
+
+    emitByte(parser, OP_POP);
+    parsePrecedence(parser, PREC_AND);
+
+    patchJump(parser, endJump);
+}
+
 static void binary(parser_t *parser, bool canAssign)
 {
     // Remember the operator.                                
@@ -468,7 +478,7 @@ static rule_t rules[] = {
     { string,   NULL,    PREC_NONE },       // TOKEN_STRING          
     { number,   NULL,    PREC_NONE },       // TOKEN_NUMBER
 
-    { NULL,     NULL,    PREC_NONE },       // TOKEN_AND             
+    { NULL,     and_,    PREC_AND },        // TOKEN_AND   
     { NULL,     NULL,    PREC_NONE },       // TOKEN_CLASS           
     { NULL,     NULL,    PREC_NONE },       // TOKEN_ELSE            
     { literal,  NULL,    PREC_NONE },       // TOKEN_FALSE           
