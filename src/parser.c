@@ -327,6 +327,14 @@ static void expression(parser_t *parser)
     parsePrecedence(parser, PREC_ASSIGNMENT);
 }
 
+static void expressionStatement(parser_t *parser)
+{
+    expression(parser);
+    consume(parser, TOKEN_SEMICOLON, "Expect ';' after expression.");
+
+    emitByte(parser, OP_POP);
+}
+
 static void printStatement(parser_t *parser)
 {
     expression(parser);
@@ -344,6 +352,9 @@ static void statement(parser_t *parser)
 {
     if (match(parser, TOKEN_PRINT)) {
         printStatement(parser);
+    }
+    else {
+        expressionStatement(parser);
     }
 }
 

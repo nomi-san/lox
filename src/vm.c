@@ -96,6 +96,11 @@ static int execute(vm_t *vm)
             NEXT;
         }
 
+        CODE(POP) {
+            POP();
+            NEXT;
+        }
+
         CODE(NIL) {
             PUSH(VAL_NIL);
             NEXT;
