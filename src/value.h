@@ -39,7 +39,7 @@ static const val_t VAL_FALSE = { .type = VT_BOOL, .Bool = false };
 
 #define VAL_BOOL(b)     ((val_t){ .type = VT_BOOL, .Bool = (b) })
 #define VAL_NUM(n)      ((val_t){ .type = VT_NUM, .Num = (n) })
-#define VAL_OBJ(o)      ((val_t){ .type = VT_OBJ, .o = (obj_t *)(o) })
+#define VAL_OBJ(o)      ((val_t){ .type = VT_OBJ, .Obj = (obj_t *)(o) })
 
 #define AS_BOOL(v)      ((v).Bool)
 #define AS_NUM(v)       ((v).Num)

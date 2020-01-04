@@ -5,6 +5,7 @@
 
 #include "parser.h"
 #include "lexer.h"
+#include "object.h"
 
 typedef struct {
     vm_t *vm;
@@ -211,6 +212,14 @@ static void number(parser_t *parser)
     emitConstant(parser, VAL_NUM(n));
 }
 
+static void string(parser_t *parser)
+{
+    str_t *s = str_copy(parser->vm,
+        parser->previous.start + 1, parser->previous.length - 2);
+
+    emitConstant(parser, VAL_OBJ(s));
+}
+
 static void unary(parser_t *parser)
 {
     toktype_t operatorType = parser->previous.type;
@@ -252,7 +261,7 @@ static rule_t rules[] = {
     { NULL,     binary,  PREC_COMPARISON }, // TOKEN_LESS_EQUAL 
 
     { NULL,     NULL,    PREC_NONE },       // TOKEN_IDENTIFIER      
-    { NULL,     NULL,    PREC_NONE },       // TOKEN_STRING          
+    { string,   NULL,    PREC_NONE },       // TOKEN_STRING          
     { number,   NULL,    PREC_NONE },       // TOKEN_NUMBER
 
     { NULL,     NULL,    PREC_NONE },       // TOKEN_AND             
