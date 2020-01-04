@@ -3,12 +3,15 @@
 #include "common.h"
 #include "value.h"
 #include "chunk.h"
+#include "gc.h"
 
 struct _vm {
     uint8_t *ip;
     chunk_t *chunk;
     val_t *top;
     val_t stack[STACK_MAX];
+
+    gc_t *gc;
 };
 
 vm_t *vm_create();

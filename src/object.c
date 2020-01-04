@@ -3,6 +3,7 @@
 #include <string.h>
 
 #include "object.h"
+#include "gc.h"
 
 #define ALLOCATE(vm, type, count) \
     (type *)reallocate(vm, NULL, 0, sizeof(type) * (count))
