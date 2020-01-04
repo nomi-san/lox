@@ -26,8 +26,45 @@ void vm_close(vm_t *vm)
     free(vm);
 }
 
+#define PUSH(vm, v)    *((vm)->top++) = (v)
+#define POP(vm)        *(--(vm)->top)
+
 static int execute(vm_t *vm)
 {
+
+#define READ_BYTE()     *(vm->ip++)
+#define READ_SHORT()    (vm->ip += 2, (uint16_t)((vm->ip[-2] << 8) | vm->ip[-1]))
+
+#define READ_CONST()    (vm)->chunk->constants.values[READ_BYTE()]
+#define READ_CONSTL()   (vm)->chunk->constants.values[READ_SHORT()]
+
+#define INTERPRET       _loop: switch(READ_BYTE())
+#define CODE(x)         case OP_##x:
+#define NEXT            goto _loop
+
+    INTERPRET
+    {
+        CODE(NIL) {
+            PUSH(vm, VAL_NIL);
+            NEXT;
+        }
+        CODE(TRUE) {
+            PUSH(vm, VAL_TRUE);
+            NEXT;
+        }
+        CODE(FALSE) {
+            PUSH(vm, VAL_FALSE);
+            NEXT;
+        }
+        CODE(CONST) {
+            PUSH(vm, READ_CONST());
+            NEXT;
+        }
+        CODE(CONSTL) {
+            PUSH(vm, READ_CONSTL());
+            NEXT;
+        }
+    }
 
     return VM_OK;
 }
