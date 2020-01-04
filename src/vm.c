@@ -7,13 +7,33 @@
 #include "value.h"
 #include "parser.h"
 
+static void resetStack(vm_t *vm)
+{
+    vm->top = vm->stack;
+}
+
+static void runtimeError(vm_t *vm, const char *format, ...)
+{
+    va_list args;
+    va_start(args, format);
+    vfprintf(stderr, format, args);
+    va_end(args);
+    fputs("\n", stderr);
+
+    size_t instruction = vm->ip - vm->chunk->code;
+    int line = vm->chunk->lines[instruction];
+    fprintf(stderr, "[line %d] in script\n", line);
+
+    resetStack(vm);
+}
+
 vm_t *vm_create()
 {
     vm_t *vm = malloc(sizeof(vm_t));
 
     if (vm != NULL) {
         memset(vm, '\0', sizeof(vm_t));
-
+        resetStack(vm);
     }
 
     return vm;
@@ -32,14 +52,18 @@ void vm_close(vm_t *vm)
 static int execute(vm_t *vm)
 {
 
+#define PREV_BYTE()     (vm->ip[-1])
 #define READ_BYTE()     *(vm->ip++)
 #define READ_SHORT()    (vm->ip += 2, (uint16_t)((vm->ip[-2] << 8) | vm->ip[-1]))
 
 #define READ_CONST()    (vm)->chunk->constants.values[READ_BYTE()]
 #define READ_CONSTL()   (vm)->chunk->constants.values[READ_SHORT()]
 
+#define ERROR(fmt, ...) do { runtimeError(vm, fmt, ##__VA_ARGS__); return VM_RUNTIME_ERROR; } while (0)
+
 #define INTERPRET       _loop: switch(READ_BYTE())
 #define CODE(x)         case OP_##x:
+#define CODE_ERR()      default:
 #define NEXT            goto _loop
 
     INTERPRET
@@ -79,6 +103,10 @@ static int execute(vm_t *vm)
             val_t a = POP(vm);
             PUSH(vm, VAL_BOOL(val_equal(a, b)));
             NEXT;
+        }
+
+        CODE_ERR() {
+            ERROR("Bad opcode, got %d!", PREV_BYTE());
         }
     }
 
