@@ -111,7 +111,7 @@ static int execute(vm_t *vm)
         }
 
         CODE(NOT) {
-            PUSH(VAL_BOOL(IS_FALSEY(POP(vm))));
+            PUSH(VAL_BOOL(IS_FALSEY(POP())));
             NEXT;
         }
 
@@ -230,4 +230,5 @@ int do_string(vm_t *vm, const char *source)
 int do_file(vm_t *file, const char *fname)
 {
 
+    return VM_OK;
 }

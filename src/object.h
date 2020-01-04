@@ -25,6 +25,7 @@ static inline bool obj_is(val_t value, otype_t type) {
     return IS_OBJ(value) && OBJ_TYPE(value) == type;
 }
 
+str_t *str_take(vm_t *vm, char *chars, int length);
 str_t *str_copy(vm_t *vm, const char *chars, int length);
 
 void obj_print(obj_t *object);
