@@ -122,3 +122,26 @@ void tab_add(tab_t *from, tab_t *to)
         }
     }
 }
+
+str_t *tab_findstr(tab_t *table, const char *chars, int length, uint32_t hash)
+{
+    if (table->count == 0) return NULL;
+
+    uint32_t index = hash % table->capacity;
+
+    for (;;) {
+        ent_t *entry = &table->entries[index];
+        str_t *key = entry->key;
+
+        if (key == NULL) {
+            // Stop if we find an empty non-tombstone entry.                 
+            if (IS_NIL(entry->value)) return NULL;
+        }
+        else if (key->length == length && key->hash == hash) {
+            // We found it.                                                  
+            return key;
+        }
+
+        index = (index + 1) % table->capacity;
+    }
+}

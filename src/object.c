@@ -43,12 +43,20 @@ static str_t *allocateString(vm_t *vm, char *chars, int length, uint32_t hash)
 str_t *str_take(vm_t *vm, char *chars, int length)
 {
     uint32_t hash = hash_bytes(chars, length);
+    str_t *interned = tab_findstr(&vm->strings, chars, length, hash);
+    if (interned != NULL) {
+        free(chars);
+        return interned;
+    }
+
     return allocateString(vm, chars, length, hash);
 }
 
 str_t *str_copy(vm_t *vm, const char *chars, int length)
 {
     uint32_t hash = hash_bytes(chars, length);
+    str_t *interned = tab_findstr(&vm->strings, chars, length, hash);
+    if (interned != NULL) return interned;
 
     char *heapChars = malloc((length + 1) * sizeof(char));
     memcpy(heapChars, chars, length);
