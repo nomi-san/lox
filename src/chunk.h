@@ -4,39 +4,31 @@
 #include "value.h"
 
 typedef enum {
-
-    OP_CALL,
-    OP_RET,
-    OP_PRINT,
-
-    OP_POP,
-
-    OP_NIL,
-    OP_TRUE,
-    OP_FALSE,
-    OP_CONST,
-    OP_CONSTL,
-
-    OP_NEG,
-    OP_NOT,
-
-    OP_LT,
-    OP_LE,
-    OP_EQ,
-
-    OP_ADD,
-    OP_SUB,
-    OP_MUL,
-    OP_DIV,
-
-    OP_DEF,
-    OP_GLD,
-    OP_GST,
-
-    OP_DEFL,
-    OP_GLDL,
-    OP_GSTL,
-
+//  opcodes        args      stack      description //
+    OP_PRINT,   /* []       [-1, +0]    pop a value from stack */
+    OP_POP,     /* []       [-1, +0]    pop a value from stack and print it */
+    OP_CALL,    /* not implemented yet */
+    OP_RET,     /* not implemented yet */
+    OP_NIL,     /* []       [-0, +1]    push nil to stack */
+    OP_TRUE,    /* []       [-0, +1]    push true to stack */
+    OP_FALSE,   /* []       [-0, +1]    push false value to stack */
+    OP_CONST,   /* [k]      [-0, +1]    push a constant from (k) to stack */
+    OP_CONSTL,  /* [k, k]   [-0, +1]    */
+    OP_NEG,     /* []       [-1, +1]    */
+    OP_NOT,     /* []       [-1, +1]    */
+    OP_LT,      /* []       [-1, +1]    */
+    OP_LE,      /* []       [-1, +1]    */
+    OP_EQ,      /* []       [-1, +1]    */
+    OP_ADD,     /* []       [-2, +1]    */
+    OP_SUB,     /* []       [-2, +1]    */
+    OP_MUL,     /* []       [-2, +1]    */
+    OP_DIV,     /* []       [-2, +1]    */
+    OP_DEF,     /* [k]      [-1, +0]    pop a value from stack and define as (k) in global */
+    OP_GLD,     /* [k]      [-0, +1]    push a from (k) in global to stack */
+    OP_GST,     /* [k]      [-0, +0]    set a value from stack as (k) in global */
+    OP_DEFL,    /* [k, k]   [-1, +0]    */
+    OP_GLDL,    /* [k, k]   [-0, +1]    */
+    OP_GSTL,    /* [k, k]   [-0, +0]    */
 } opcode_t;
 
 typedef struct {
