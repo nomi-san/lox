@@ -3,6 +3,7 @@
 #include "common.h"
 
 typedef struct _obj obj_t;
+typedef struct _str str_t;
 
 typedef enum {
     VT_NIL,
@@ -10,6 +11,11 @@ typedef enum {
     VT_NUM,
     VT_OBJ
 } vtype_t;
+
+typedef enum {
+    OT_STR,
+    OT_FUN,
+} otype_t;
 
 struct _val {
     vtype_t type;
