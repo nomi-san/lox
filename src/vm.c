@@ -68,6 +68,18 @@ static int execute(vm_t *vm)
             
             return VM_OK;
         }
+
+        CODE(NOT) {
+            PUSH(vm, VAL_BOOL(IS_FALSEY(POP(vm))));
+            NEXT;
+        }
+
+        CODE(EQ) {
+            val_t b = POP(vm);
+            val_t a = POP(vm);
+            PUSH(vm, VAL_BOOL(val_equal(a, b)));
+            NEXT;
+        }
     }
 
     return VM_OK;
