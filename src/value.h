@@ -17,6 +17,28 @@ typedef enum {
     OT_FUN,
 } otype_t;
 
+enum {
+    VT_NIL_NIL      = CMB_BYTES(VT_NIL, VT_NIL),
+    VT_NIL_BOOL     = CMB_BYTES(VT_NIL, VT_BOOL),
+    VT_NIL_NUM      = CMB_BYTES(VT_NIL, VT_NUM),
+    VT_NIL_OBJ      = CMB_BYTES(VT_NIL, VT_OBJ),
+
+    VT_BOOL_NIL     = CMB_BYTES(VT_BOOL, VT_NIL),
+    VT_BOOL_BOOL    = CMB_BYTES(VT_BOOL, VT_BOOL),
+    VT_BOOL_NUM     = CMB_BYTES(VT_BOOL, VT_NUM),
+    VT_BOOL_OBJ     = CMB_BYTES(VT_BOOL, VT_OBJ),
+
+    VT_NUM_NIL      = CMB_BYTES(VT_NUM, VT_NIL),
+    VT_NUM_BOOL     = CMB_BYTES(VT_NUM, VT_BOOL),
+    VT_NUM_NUM      = CMB_BYTES(VT_NUM, VT_NUM),
+    VT_NUM_OBJ      = CMB_BYTES(VT_NUM, VT_OBJ),
+
+    VT_OBJ_NIL      = CMB_BYTES(VT_OBJ, VT_NIL),
+    VT_OBJ_BOOL     = CMB_BYTES(VT_OBJ, VT_BOOL),
+    VT_OBJ_NUM      = CMB_BYTES(VT_OBJ, VT_NUM),
+    VT_OBJ_OBJ      = CMB_BYTES(VT_OBJ, VT_OBJ),
+};
+
 struct _val {
     vtype_t type;
     union {
