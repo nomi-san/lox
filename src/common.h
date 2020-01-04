@@ -12,5 +12,7 @@
 #define VM_COMPILE_ERROR    1
 #define VM_RUNTIME_ERROR    2
 
+#define DEBUG_PRINT_CODE
+
 typedef struct _val val_t;
 typedef struct _vm  vm_t;

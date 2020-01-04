@@ -30,7 +30,7 @@ typedef enum {
     PREC_PRIMARY
 } prec_t;
 
-typedef void (* parsefn_t)();
+typedef void (* parsefn_t)(parser_t *parser);
 
 typedef struct {
     parsefn_t prefix;
@@ -148,10 +148,16 @@ static void emitConstant(parser_t *parser, val_t value)
 static void endCompiler(parser_t *parser)
 {
     emitReturn(parser);
+
+#ifdef DEBUG_PRINT_CODE                      
+    if (!parser->hadError) {
+        //disassembleChunk(currentChunk(parser), "code");
+    }
+#endif
 }
 
 static void expression(parser_t *parser);
-static rule_t *getRule(parser_t *parser, toktype_t type);
+static rule_t *getRule(toktype_t type);
 static void parsePrecedence(parser_t *parser, prec_t precedence);
 
 static void binary(parser_t *parser)
@@ -160,7 +166,7 @@ static void binary(parser_t *parser)
     toktype_t operatorType = parser->previous.type;
 
     // Compile the right operand.                            
-    rule_t *rule = getRule(parser, operatorType);
+    rule_t *rule = getRule(operatorType);
     parsePrecedence(parser, (prec_t)(rule->precedence + 1));
 
     // Emit the operator instruction.                        
@@ -252,10 +258,23 @@ static rule_t rules[] = {
 
 static void parsePrecedence(parser_t *parser, prec_t precedence)
 {
-    // What goes here?                                
+    advance(parser);
+    parsefn_t prefixRule = getRule(parser->previous.type)->prefix;
+    if (prefixRule == NULL) {
+        error(parser, "Expect expression.");
+        return;
+    }
+
+    prefixRule(parser);
+
+    while (precedence <= getRule(parser->current.type)->precedence) {
+        advance(parser);
+        parsefn_t infixRule = getRule(parser->previous.type)->infix;
+        infixRule(parser);
+    }
 }
 
-static rule_t *getRule(parser_t *parser, toktype_t type)
+static rule_t *getRule(toktype_t type)
 {
     return &rules[type];
 }
