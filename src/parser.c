@@ -434,6 +434,18 @@ static void variable(parser_t *parser, bool canAssign)
     namedVariable(parser, parser->previous, canAssign);
 }
 
+static void or_(parser_t *parser, bool canAssign)
+{
+    int elseJump = emitJump(parser, OP_JMPF);
+    int endJump = emitJump(parser, OP_JMP);
+
+    patchJump(parser, elseJump);
+    emitByte(parser, OP_POP);
+
+    parsePrecedence(parser, PREC_OR);
+    patchJump(parser, endJump);
+}
+
 static void unary(parser_t *parser, bool canAssign)
 {
     toktype_t operatorType = parser->previous.type;
@@ -486,7 +498,7 @@ static rule_t rules[] = {
     { NULL,     NULL,    PREC_NONE },       // TOKEN_FUN             
     { NULL,     NULL,    PREC_NONE },       // TOKEN_IF              
     { literal,  NULL,    PREC_NONE },       // TOKEN_NIL             
-    { NULL,     NULL,    PREC_NONE },       // TOKEN_OR              
+    { NULL,     or_,     PREC_OR },         // TOKEN_OR   
     { NULL,     NULL,    PREC_NONE },       // TOKEN_PRINT           
     { NULL,     NULL,    PREC_NONE },       // TOKEN_RETURN          
     { NULL,     NULL,    PREC_NONE },       // TOKEN_SUPER           
