@@ -257,6 +257,17 @@ static void string(parser_t *parser)
     emitConstant(parser, VAL_OBJ(s));
 }
 
+static void namedVariable(parser_t *parser, tok_t name)
+{
+    uint16_t arg = identifierConstant(parser, &name);
+    emitBytes(parser, OP_GLD, arg);
+}
+
+static void variable(parser_t *parser)
+{
+    namedVariable(parser, parser->previous);
+}
+
 static void unary(parser_t *parser)
 {
     toktype_t operatorType = parser->previous.type;
@@ -297,7 +308,7 @@ static rule_t rules[] = {
     { NULL,     binary,  PREC_COMPARISON }, // TOKEN_LESS         
     { NULL,     binary,  PREC_COMPARISON }, // TOKEN_LESS_EQUAL 
 
-    { NULL,     NULL,    PREC_NONE },       // TOKEN_IDENTIFIER      
+    { variable, NULL,    PREC_NONE },       // TOKEN_IDENTIFIER
     { string,   NULL,    PREC_NONE },       // TOKEN_STRING          
     { number,   NULL,    PREC_NONE },       // TOKEN_NUMBER
 

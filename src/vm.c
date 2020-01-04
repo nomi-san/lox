@@ -369,6 +369,20 @@ static int execute(vm_t *vm)
             NEXT;
         }
 
+        CODE(GLDL) {
+            str_t *name = READ_STRL();
+            val_t value;
+            goto _gld;
+        CODE(GLD)
+            name = READ_STR();
+        _gld:            
+            if (!tab_get(&vm->globals, name, &value)) {
+                ERROR("Undefined variable '%s'.", name->chars);
+            }
+            PUSH(value);
+            NEXT;
+        }
+
         CODE_ERR() {
             ERROR("Bad opcode, got %d!", PREV_BYTE());
         }
