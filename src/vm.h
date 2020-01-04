@@ -13,4 +13,4 @@ vm_t *vm_create();
 void vm_close(vm_t *vm);
 
 int do_string(vm_t *vm, const char *source);
-int do_file(vm_t *file, const char *fname);
+int do_file(vm_t *vm, const char *fname);
