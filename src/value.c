@@ -35,8 +35,7 @@ bool val_equal(val_t a, val_t b)
         case VT_NUM:
             return AS_NUM(a) == AS_NUM(b);
         case VT_OBJ:
-            // todo
-            ;
+            return AS_OBJ(a) == AS_OBJ(b);
     }
 
     return false;
