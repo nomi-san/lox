@@ -16,4 +16,7 @@ typedef struct {
 
 void tab_init(tab_t *table);
 void tab_free(tab_t *table);
+bool tab_get(tab_t *table, str_t *key, val_t *value);
 bool tab_set(tab_t *table, str_t *key, val_t value);
+bool tab_remove(tab_t *table, str_t *key);
+void tab_add(tab_t *from, tab_t *to);

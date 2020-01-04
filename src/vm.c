@@ -34,6 +34,10 @@ vm_t *vm_create()
 
     if (vm != NULL) {
         memset(vm, '\0', sizeof(vm_t));
+
+        gc_init(&vm->gc);
+        tab_init(&vm->strings);
+
         resetStack(vm);
     }
 
@@ -43,6 +47,9 @@ vm_t *vm_create()
 void vm_close(vm_t *vm)
 {
     if (vm == NULL) return;
+
+    tab_free(&vm->strings);
+    gc_free(&vm->gc);
 
     free(vm);
 }

@@ -4,6 +4,7 @@
 #include "value.h"
 #include "chunk.h"
 #include "gc.h"
+#include "table.h"
 
 struct _vm {
     uint8_t *ip;
@@ -11,7 +12,8 @@ struct _vm {
     val_t *top;
     val_t stack[STACK_MAX];
 
-    gc_t *gc;
+    gc_t gc;
+    tab_t strings;
 };
 
 vm_t *vm_create();
