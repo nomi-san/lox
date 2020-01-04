@@ -7,15 +7,19 @@
 #include "lexer.h"
 #include "object.h"
 
-typedef struct {
+typedef struct _parser   parser_t;
+typedef struct _compiler compiler_t;
+
+struct _parser {
     vm_t *vm;
     chunk_t *compilingChunk;
     lexer_t *lexer;
+    compiler_t *compiler;
     tok_t current;
     tok_t previous;
     bool hadError;
     bool panicMode;
-} parser_t;
+};
 
 typedef enum {
     PREC_NONE,
@@ -38,6 +42,18 @@ typedef struct {
     parsefn_t infix;
     prec_t precedence;
 } rule_t;
+
+typedef struct {
+    tok_t name;
+    int depth;
+} local_t;
+
+struct _compiler
+{
+    local_t locals[UINT8_COUNT];
+    int localCount;
+    int scopeDepth;
+};
 
 static chunk_t *currentChunk(parser_t *parser)
 {
@@ -158,6 +174,13 @@ static void emitConstant(parser_t *parser, val_t value)
     emitBytes(parser, OP_CONST, (uint8_t)constant);
 }
 
+static void initCompiler(parser_t *parser, compiler_t *compiler)
+{
+    compiler->localCount = 0;
+    compiler->scopeDepth = 0;
+    parser->compiler = compiler;
+}
+
 static void endCompiler(parser_t *parser)
 {
     emitReturn(parser);
@@ -167,6 +190,25 @@ static void endCompiler(parser_t *parser)
         //disassembleChunk(currentChunk(parser), "code");
     }
 #endif
+}
+
+static void beginScope(parser_t *parser)
+{
+    compiler_t *current = parser->compiler;
+    current->scopeDepth++;
+}
+
+static void endScope(parser_t *parser)
+{
+    compiler_t *current = parser->compiler;
+    current->scopeDepth--;
+
+    while (current->localCount > 0 &&
+        current->locals[current->localCount - 1].depth >
+        current->scopeDepth) {
+        emitByte(parser, OP_POP);
+        current->localCount--;
+    }
 }
 
 static void expression(parser_t *parser);
@@ -181,14 +223,64 @@ static uint16_t identifierConstant(parser_t *parser, tok_t *name)
     return makeConstant(parser, VAL_OBJ(id));
 }
 
+static bool identifiersEqual(tok_t *a, tok_t *b)
+{
+    if (a->length != b->length) return false;
+    return memcmp(a->start, b->start, a->length) == 0;
+}
+
+static void addLocal(parser_t *parser, tok_t name)
+{
+    compiler_t *current = parser->compiler;
+
+    if (current->localCount == UINT8_COUNT) {
+        error(parser, "Too many local variables in function.");
+        return;
+    }
+
+    local_t *local = &current->locals[current->localCount++];
+    local->name = name;
+    local->depth = current->scopeDepth;
+}
+
+static void declareVariable(parser_t *parser)
+{
+    compiler_t *current = parser->compiler;
+
+    // Global variables are implicitly declared.
+    if (current->scopeDepth == 0) return;
+
+    tok_t *name = &parser->previous;
+    for (int i = current->localCount - 1; i >= 0; i--) {
+        local_t *local = &current->locals[i];
+        if (local->depth != -1 && local->depth < current->scopeDepth) {
+            break;
+        }
+
+        if (identifiersEqual(name, &local->name)) {
+            error(parser, "Variable with this name already declared in this scope.");
+        }
+    }
+
+    addLocal(parser, *name);
+}
+
 static uint16_t parseVariable(parser_t *parser, const char *errorMessage)
 {
     consume(parser, TOKEN_IDENTIFIER, errorMessage);
+
+    declareVariable(parser);
+    if (parser->compiler->scopeDepth > 0) return 0;
+
     return identifierConstant(parser, &parser->previous);
 }
 
 static void defineVariable(parser_t *parser, uint16_t global)
 {
+    if (parser->compiler->scopeDepth > 0) {
+        return;
+    }
+
     if (global > UINT8_MAX) {
         emitByte(parser, OP_DEFL);
         emitBytes(parser, (global >> 8) & 0xFF, global & 0xFF);
@@ -385,6 +477,15 @@ static void expression(parser_t *parser)
     parsePrecedence(parser, PREC_ASSIGNMENT);
 }
 
+static void block(parser_t *parser)
+{
+    while (!check(parser, TOKEN_RIGHT_BRACE) && !check(parser, TOKEN_EOF)) {
+        declaration(parser);
+    }
+
+    consume(parser, TOKEN_RIGHT_BRACE, "Expect '}' after block.");
+}
+
 static void varDeclaration(parser_t *parser)
 {
     uint16_t global = parseVariable(parser, "Expect variable name.");
@@ -457,6 +558,11 @@ static void statement(parser_t *parser)
     if (match(parser, TOKEN_PRINT)) {
         printStatement(parser);
     }
+    else if (match(parser, TOKEN_LEFT_BRACE)) {
+        beginScope(parser);
+        block(parser);
+        endScope(parser);
+    }
     else {
         expressionStatement(parser);
     }
@@ -466,8 +572,10 @@ bool compile(vm_t *vm, const char *fname, const char *source, chunk_t *chunk)
 {
     lexer_t lexer;
     parser_t parser;
+    compiler_t compiler;
 
     lexer_init(&lexer, vm, fname, source);
+    initCompiler(&parser, &compiler);
     parser.vm = vm;
     parser.compilingChunk = chunk;
     parser.lexer = &lexer;

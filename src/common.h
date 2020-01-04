@@ -8,6 +8,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#define UINT8_COUNT         (UINT8_MAX + 1)
+
 #define CMB_BYTES(l, r)	    (uint8_t)(((char)(l) & 0xF) | ((char)(r) & 0xF) << 4)
 #define CMB_LEFT(c)	        (char)(((c) & 0xF))
 #define CMB_RIGHT(c)	    (char)((((c) >> 4) & 0xF))
