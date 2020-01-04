@@ -29,6 +29,10 @@ typedef enum {
     OP_MUL,
     OP_DIV,
 
+    OP_DEF,
+    OP_GLD,
+    OP_GST,
+
 } opcode_t;
 
 typedef struct {

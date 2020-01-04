@@ -175,6 +175,23 @@ static void declaration(parser_t *parser);
 static rule_t *getRule(toktype_t type);
 static void parsePrecedence(parser_t *parser, prec_t precedence);
 
+static uint8_t identifierConstant(parser_t *parser, tok_t *name)
+{
+    str_t *id = str_copy(parser->vm, name->start, name->length);
+    return makeConstant(parser, VAL_OBJ(id));
+}
+
+static uint8_t parseVariable(parser_t *parser, const char *errorMessage)
+{
+    consume(parser, TOKEN_IDENTIFIER, errorMessage);
+    return identifierConstant(parser, &parser->previous);
+}
+
+static void defineVariable(parser_t *parser, uint8_t global)
+{
+    emitBytes(parser, OP_DEF, global);
+}
+
 static void binary(parser_t *parser)
 {
     // Remember the operator.                                
@@ -327,6 +344,21 @@ static void expression(parser_t *parser)
     parsePrecedence(parser, PREC_ASSIGNMENT);
 }
 
+static void varDeclaration(parser_t *parser)
+{
+    uint8_t global = parseVariable(parser, "Expect variable name.");
+
+    if (match(parser, TOKEN_EQUAL)) {
+        expression(parser);
+    }
+    else {
+        emitByte(parser, OP_NIL);
+    }
+    consume(parser, TOKEN_SEMICOLON, "Expect ';' after variable declaration.");
+
+    defineVariable(parser, global);
+}
+
 static void expressionStatement(parser_t *parser)
 {
     expression(parser);
@@ -369,9 +401,14 @@ static void synchronize(parser_t *parser)
 
 static void declaration(parser_t *parser)
 {
-    statement(parser);
+    if (match(parser, TOKEN_VAR)) {
+        varDeclaration(parser);
+    }
+    else {
+        statement(parser);
+    }
 
-    if (parser->panicMode) synchronize();
+    if (parser->panicMode) synchronize(parser);
 }
 
 static void statement(parser_t *parser)
