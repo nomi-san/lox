@@ -425,6 +425,8 @@ int do_string(vm_t *vm, const char *source)
 
 int do_file(vm_t *vm, const char *fname)
 {
+    char *source = read_file(fname, NULL);
+    if (source == NULL) return VM_COMPILE_ERROR;
 
     return VM_OK;
 }

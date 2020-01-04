@@ -1,5 +1,9 @@
 #pragma once
 
+#ifdef _MSC_VER
+#pragma warning(disable: 4996)
+#endif
+
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -24,3 +28,4 @@ typedef struct _vm  vm_t;
 typedef struct _gc  gc_t;
 
 uint32_t hash_bytes(const void *bytes, size_t size);
+char *read_file(const char *path, size_t *size);
