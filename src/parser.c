@@ -16,6 +16,20 @@ typedef struct {
     bool panicMode;
 } parser_t;
 
+typedef enum {
+    PREC_NONE,
+    PREC_ASSIGNMENT,  // =        
+    PREC_OR,          // or       
+    PREC_AND,         // and      
+    PREC_EQUALITY,    // == !=    
+    PREC_COMPARISON,  // < > <= >=
+    PREC_TERM,        // + -      
+    PREC_FACTOR,      // * /      
+    PREC_UNARY,       // ! -      
+    PREC_CALL,        // . ()     
+    PREC_PRIMARY
+} prec_t;
+
 static chunk_t *currentChunk(parser_t *parser)
 {
     return parser->compilingChunk;
@@ -128,15 +142,41 @@ static void endCompiler(parser_t *parser)
     emitReturn(parser);
 }
 
+static void grouping(parser_t *parser)
+{
+    expression(parser);
+    consume(parser, TOKEN_RIGHT_PAREN, "Expect ')' after expression.");
+}
+
 static void number(parser_t *parser)
 {
     double n = strtod(parser->previous.start, NULL);
     emitConstant(parser, VAL_NUM(n));
 }
 
+static void unary(parser_t *parser)
+{
+    toktype_t operatorType = parser->previous.type;
+
+    // Compile the operand.                        
+    parsePrecedence(parser, PREC_UNARY);
+
+    // Emit the operator instruction.              
+    switch (operatorType) {
+        case TOKEN_MINUS: emitByte(parser, OP_NEG); break;
+        default:
+            return; // Unreachable.                    
+    }
+}
+
+static void parsePrecedence(parser_t *parser, prec_t precedence)
+{
+    // What goes here?                                
+}
+
 static void expression(parser_t *parser)
 {
-    // What goes here?      
+    parsePrecedence(parser, PREC_ASSIGNMENT);
 }
 
 bool compile(vm_t *vm, const char *fname, const char *source, chunk_t *chunk)
