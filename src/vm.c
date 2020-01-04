@@ -109,22 +109,27 @@ static int execute(vm_t *vm)
             PUSH(VAL_NIL);
             NEXT;
         }
+
         CODE(TRUE) {
             PUSH(VAL_TRUE);
             NEXT;
         }
+
         CODE(FALSE) {
             PUSH(VAL_FALSE);
             NEXT;
         }
+
         CODE(CONST) {
             PUSH(READ_CONST());
             NEXT;
         }
+
         CODE(CONSTL) {
             PUSH(READ_CONSTL());
             NEXT;
         }
+
         CODE(RET) {
             
             return VM_OK;
@@ -353,11 +358,15 @@ static int execute(vm_t *vm)
             NEXT;
         }
 
-        CODE(DEF) {
-            str_t *name = READ_STR();
+        CODE(DEFL) {
+            str_t *name = READ_STRL();
+            goto _def;
+        CODE(DEF)
+            name = READ_STR();
+        _def:
             tab_set(&vm->globals, name, PEEK(0));
             POP();
-            break;
+            NEXT;
         }
 
         CODE_ERR() {

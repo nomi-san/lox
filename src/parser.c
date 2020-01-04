@@ -175,21 +175,27 @@ static void declaration(parser_t *parser);
 static rule_t *getRule(toktype_t type);
 static void parsePrecedence(parser_t *parser, prec_t precedence);
 
-static uint8_t identifierConstant(parser_t *parser, tok_t *name)
+static uint16_t identifierConstant(parser_t *parser, tok_t *name)
 {
     str_t *id = str_copy(parser->vm, name->start, name->length);
     return makeConstant(parser, VAL_OBJ(id));
 }
 
-static uint8_t parseVariable(parser_t *parser, const char *errorMessage)
+static uint16_t parseVariable(parser_t *parser, const char *errorMessage)
 {
     consume(parser, TOKEN_IDENTIFIER, errorMessage);
     return identifierConstant(parser, &parser->previous);
 }
 
-static void defineVariable(parser_t *parser, uint8_t global)
+static void defineVariable(parser_t *parser, uint16_t global)
 {
-    emitBytes(parser, OP_DEF, global);
+    if (global > UINT8_MAX) {
+        emitByte(parser, OP_DEFL);
+        emitBytes(parser, (global >> 8) & 0xFF, global & 0xFF);
+        return;
+    }
+
+    emitBytes(parser, OP_DEF, (uint8_t)global);
 }
 
 static void binary(parser_t *parser)
@@ -346,7 +352,7 @@ static void expression(parser_t *parser)
 
 static void varDeclaration(parser_t *parser)
 {
-    uint8_t global = parseVariable(parser, "Expect variable name.");
+    uint16_t global = parseVariable(parser, "Expect variable name.");
 
     if (match(parser, TOKEN_EQUAL)) {
         expression(parser);

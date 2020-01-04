@@ -33,6 +33,10 @@ typedef enum {
     OP_GLD,
     OP_GST,
 
+    OP_DEFL,
+    OP_GLDL,
+    OP_GSTL,
+
 } opcode_t;
 
 typedef struct {
