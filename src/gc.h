@@ -3,11 +3,11 @@
 #include "common.h"
 #include "object.h"
 
-typedef struct {
+struct _gc {
     size_t allocated;
     size_t next;
     obj_t *objects;
-} gc_t;
+};
 
 void gc_init(gc_t *gc);
 void gc_free(gc_t *gc);

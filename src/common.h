@@ -16,5 +16,6 @@
 
 typedef struct _val val_t;
 typedef struct _vm  vm_t;
+typedef struct _gc  gc_t;
 
 uint32_t hash_bytes(const void *bytes, size_t size);

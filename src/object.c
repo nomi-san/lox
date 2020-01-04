@@ -5,6 +5,7 @@
 #include "object.h"
 #include "vm.h"
 #include "gc.h"
+#include "table.h"
 
 #define ALLOC(gc, size) \
     gc_realloc(gc, NULL, 0, size)
@@ -17,11 +18,13 @@
 
 static obj_t *allocateObject(vm_t *vm, size_t size, otype_t type)
 {
-    obj_t *object = ALLOC(vm->gc, size);
+    gc_t *gc = &vm->gc;
+
+    obj_t *object = ALLOC(gc, size);
     object->type = type;
 
-    object->next = vm->gc->objects;
-    vm->gc->objects = object;
+    object->next = gc->objects;
+    gc->objects = object;
     return object;
 }
 
@@ -31,6 +34,8 @@ static str_t *allocateString(vm_t *vm, char *chars, int length, uint32_t hash)
     string->length = length;
     string->chars = chars;
     string->hash = hash;
+
+    tab_set(&vm->strings, string, VAL_NIL);
 
     return string;
 }

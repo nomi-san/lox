@@ -29,4 +29,4 @@ str_t *str_take(vm_t *vm, char *chars, int length);
 str_t *str_copy(vm_t *vm, const char *chars, int length);
 
 void obj_print(obj_t *object);
-void obj_free(vm_t *vm, obj_t *object);
+void obj_free(gc_t *gc, obj_t *object);
