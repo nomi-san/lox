@@ -365,6 +365,23 @@ static void defineVariable(parser_t *parser, uint16_t global)
     emitBytesAndConstLong(parser, OP_DEF, global);
 }
 
+static uint8_t argumentList(parser_t *parser)
+{
+    uint8_t argCount = 0;
+    if (!check(parser, TOKEN_RIGHT_PAREN)) {
+        do {
+            expression(parser);
+            argCount++;
+            if (argCount == 32) {
+                error(parser, "Cannot have more than 32 arguments.");
+            }
+        } while (match(parser, TOKEN_COMMA));
+    }
+
+    consume(parser, TOKEN_RIGHT_PAREN, "Expect ')' after arguments.");
+    return argCount;
+}
+
 static void and_(parser_t *parser, bool canAssign)
 {
     int endJump = emitJump(parser, OP_JMPF);
@@ -401,6 +418,12 @@ static void binary(parser_t *parser, bool canAssign)
         default:
             return; // Unreachable.                              
     }
+}
+
+static void call(parser_t *parser, bool canAssign)
+{
+    uint8_t argCount = argumentList(parser);
+    emitBytes(parser, OP_CALL, argCount);
 }
 
 static void literal(parser_t *parser, bool canAssign)
@@ -492,7 +515,7 @@ static void unary(parser_t *parser, bool canAssign)
 }
 
 static rule_t rules[] = {
-    { grouping, NULL,    PREC_NONE },       // TOKEN_LEFT_PAREN      
+    { grouping, call,    PREC_CALL },       // TOKEN_LEFT_PAREN 
     { NULL,     NULL,    PREC_NONE },       // TOKEN_RIGHT_PAREN     
     { NULL,     NULL,    PREC_NONE },       // TOKEN_LEFT_BRACE
     { NULL,     NULL,    PREC_NONE },       // TOKEN_RIGHT_BRACE

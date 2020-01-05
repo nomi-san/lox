@@ -22,11 +22,22 @@ static void runtimeError(vm_t *vm, const char *format, ...)
     va_end(args);
     fputs("\n", stderr);
 
-    frame_t *frame = &vm->frames[vm->frameCount - 1];
-    size_t instruction = frame->ip - frame->function->chunk.code;
-    int line = CHUNK_GETLN(&frame->function->chunk, instruction);
-    int column = CHUNK_GETCOL(&frame->function->chunk, instruction);
-    fprintf(stderr, "[%d:%d] in script\n", line, column);
+    for (int i = vm->frameCount - 1; i >= 0; i--) {
+        frame_t *frame = &vm->frames[i];
+        fun_t *function = frame->function;
+        // -1 because the IP is sitting on the next instruction to be
+        // executed.                                                 
+        size_t instruction = frame->ip - function->chunk.code - 1;
+        int line = CHUNK_GETLN(&frame->function->chunk, instruction);
+        int column = CHUNK_GETCOL(&frame->function->chunk, instruction);
+        fprintf(stderr, "[%d:%d] in ", line, column);
+        if (function->name == NULL) {
+            fprintf(stderr, "script\n");
+        }
+        else {
+            fprintf(stderr, "%s()\n", function->name->chars);
+        }
+    }
 
     resetStack(vm);
 }
@@ -74,6 +85,44 @@ static void concatenate(vm_t *vm)
 
     str_t *result = str_take(vm, chars, length);
     PUSH(VAL_OBJ(result));
+}
+
+static bool call(vm_t *vm, fun_t *function, int argCount)
+{
+    if (argCount != function->arity) {
+        runtimeError(vm, "Expected %d arguments but got %d.",
+            function->arity, argCount);
+        return false;
+    }
+
+    if (vm->frameCount == FRAMES_MAX) {
+        runtimeError(vm, "Stack overflow.");
+        return false;
+    }
+
+    frame_t *frame = &vm->frames[vm->frameCount++];
+    frame->function = function;
+    frame->ip = function->chunk.code;
+
+    frame->slots = vm->top - argCount - 1;
+    return true;
+}
+
+static bool callValue(vm_t *vm, val_t callee, int argCount)
+{
+    if (IS_OBJ(callee)) {
+        switch (OBJ_TYPE(callee)) {
+            case OT_FUN:
+                return call(vm, AS_FUN(callee), argCount);
+
+            default:
+                // Non-callable object type.                   
+                break;
+        }
+    }
+
+    runtimeError(vm, "Can only call functions and classes.");
+    return false;
 }
 
 static int execute(vm_t *vm)
@@ -148,6 +197,16 @@ static int execute(vm_t *vm)
 
         CODE(CONSTL) {
             PUSH(READ_CONSTL());
+            NEXT;
+        }
+
+        CODE(CALL) {
+            int argCount = READ_BYTE();
+            STORE_FRAME();
+            if (!callValue(vm, PEEK(argCount), argCount)) {
+                return VM_RUNTIME_ERROR;
+            }
+            LOAD_FRAME();
             NEXT;
         }
 
@@ -452,11 +511,10 @@ int do_string(vm_t *vm, const char *source)
     fun_t *function = compile(vm, NULL, source);
     if (function == NULL) return VM_COMPILE_ERROR;
 
-    PUSH(VAL_OBJ(function));
-    frame_t *frame = &vm->frames[vm->frameCount++];
-    frame->function = function;
-    frame->ip = function->chunk.code;
-    frame->slots = vm->stack;
+    val_t script = VAL_OBJ(function);
+
+    PUSH(script);
+    callValue(vm, script, 0);
 
     return execute(vm);
 }
