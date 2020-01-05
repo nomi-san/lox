@@ -59,21 +59,25 @@ src_t *src_new(const char *fname)
     src_t *source = malloc(sizeof(src_t));
     if (source == NULL) return NULL;
 
-    source->fname = fname;
-    source->buffer = read_file(fname, &source->size);
-
-    if (source->buffer == NULL) {
+    char *buffer = read_file(fname, &source->size);
+    if (buffer == NULL) {
         free(source);
         return NULL;
     }
 
+    const char *s = strrchr(fname, '/');
+    if (s == NULL) s = strrchr(fname, '\\');
+    if (s == NULL) s = fname;
+
+    source->fname = strdup(s);
+    source->buffer = buffer;
     return source;
 }
 
 void src_free(src_t *source)
 {
     if (source == NULL) return;
-
+    free(source->fname);
     free(source->buffer);
     free(source);
 }

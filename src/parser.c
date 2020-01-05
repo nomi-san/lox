@@ -76,7 +76,7 @@ static void errorAt(parser_t *parser, tok_t *token, const char *message)
     if (parser->panicMode) return;
     parser->panicMode = true;
 
-    fprintf(stderr, "[line %d] Error", token->line);
+    fprintf(stderr, "[%s:%d:%d] Error", parser->source->fname, token->line, token->column);
 
     if (token->type == TOKEN_EOF) {
         fprintf(stderr, " at end");

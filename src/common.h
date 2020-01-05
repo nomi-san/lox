@@ -32,8 +32,8 @@ typedef struct _gc  gc_t;
 
 typedef struct {
     char *buffer;
+    char *fname;
     size_t size;
-    const char *fname;
 } src_t;
 
 uint32_t hash_bytes(const void *bytes, size_t size);

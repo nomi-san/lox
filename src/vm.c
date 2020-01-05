@@ -28,9 +28,10 @@ static void runtimeError(vm_t *vm, const char *format, ...)
         // -1 because the IP is sitting on the next instruction to be
         // executed.                                                 
         size_t instruction = frame->ip - function->chunk.code - 1;
+        const char *fname = frame->function->chunk.source->fname;
         int line = CHUNK_GETLN(&frame->function->chunk, instruction);
         int column = CHUNK_GETCOL(&frame->function->chunk, instruction);
-        fprintf(stderr, "[%d:%d] in ", line, column);
+        fprintf(stderr, "[%s:%d:%d] in ", fname, line, column);
         if (function->name == NULL) {
             fprintf(stderr, "script\n");
         }
