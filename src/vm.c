@@ -202,17 +202,29 @@ static int execute(vm_t *vm)
 
         CODE(CALL) {
             int argCount = READ_BYTE();
+
             STORE_FRAME();
             if (!callValue(vm, PEEK(argCount), argCount)) {
                 return VM_RUNTIME_ERROR;
             }
+
             LOAD_FRAME();
             NEXT;
         }
 
         CODE(RET) {
-            
-            return VM_OK;
+            val_t result = POP();
+
+            if (--vm->frameCount == 0) {
+                POP();
+                return VM_OK;
+            }
+
+            vm->top = frame->slots;
+            PUSH(result);
+
+            LOAD_FRAME();
+            NEXT;
         }
 
         CODE(NOT) {

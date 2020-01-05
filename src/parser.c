@@ -162,6 +162,7 @@ static int emitJump(parser_t *parser, uint8_t instruction)
 
 static void emitReturn(parser_t *parser)
 {
+    emitByte(parser, OP_NIL);
     emitByte(parser, OP_RET);
 }
 
