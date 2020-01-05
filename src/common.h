@@ -30,6 +30,8 @@ typedef struct _val val_t;
 typedef struct _vm  vm_t;
 typedef struct _gc  gc_t;
 
+typedef val_t (* cfn_t)(vm_t *vm, int argc, val_t *args);
+
 typedef struct {
     char *buffer;
     char *fname;

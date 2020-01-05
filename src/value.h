@@ -10,7 +10,8 @@ typedef enum {
     VT_NIL,
     VT_BOOL,
     VT_NUM,
-    VT_OBJ
+    VT_OBJ,
+    VT_CFN
 } vtype_t;
 
 typedef enum {
@@ -38,6 +39,8 @@ enum {
     VT_OBJ_BOOL     = CMB_BYTES(VT_OBJ, VT_BOOL),
     VT_OBJ_NUM      = CMB_BYTES(VT_OBJ, VT_NUM),
     VT_OBJ_OBJ      = CMB_BYTES(VT_OBJ, VT_OBJ),
+
+    VT_CFN_CFN      = CMB_BYTES(VT_CFN, VT_CFN)
 };
 
 struct _val {
@@ -45,6 +48,7 @@ struct _val {
     union {
         bool Bool : 1;
         double Num;
+        cfn_t CFn;
         obj_t *Obj;
         uint64_t raw;
     };
@@ -63,16 +67,19 @@ static const val_t VAL_FALSE = { .type = VT_BOOL, .Bool = false };
 #define VAL_BOOL(b)     ((val_t){ .type = VT_BOOL, .Bool = (b) })
 #define VAL_NUM(n)      ((val_t){ .type = VT_NUM, .Num = (n) })
 #define VAL_OBJ(o)      ((val_t){ .type = VT_OBJ, .Obj = (obj_t *)(o) })
+#define VAL_CFN(c)      ((val_t){ .type = VT_CFN, .CFn = (c) })
 
 #define AS_BOOL(v)      ((v).Bool)
 #define AS_NUM(v)       ((v).Num)
 #define AS_OBJ(v)       ((v).Obj)
+#define AS_CFN(v)    ((v).CFn)
 #define AS_TYPE(v)      ((v).type)
 
 #define IS_NIL(v)       (AS_TYPE(v) == VT_NIL)
 #define IS_BOOL(v)      (AS_TYPE(v) == VT_BOOL)
 #define IS_NUM(v)       (AS_TYPE(v) == VT_NUM)
 #define IS_OBJ(v)       (AS_TYPE(v) == VT_OBJ)
+#define IS_CFN(v)       (AS_TYPE(v) == VT_CFN)
 
 #define IS_FALSEY(v)    (!(bool)(v).raw)
 

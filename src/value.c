@@ -16,6 +16,9 @@ void val_print(val_t value)
         case VT_NUM:
             printf("%.14g", AS_NUM(value));
             break;
+        case VT_CFN:
+            printf("fn: %p", AS_CFN(value));
+            break;
         case VT_OBJ:
             obj_print(AS_OBJ(value));
             break;
@@ -36,6 +39,8 @@ bool val_equal(val_t a, val_t b)
             return AS_NUM(a) == AS_NUM(b);
         case VT_OBJ_OBJ:
             return AS_OBJ(a) == AS_OBJ(b);
+        case VT_CFN_CFN:
+            return AS_CFN(a) == AS_CFN(b);
         case VT_BOOL_NUM:
             return (double)AS_BOOL(a) == AS_NUM(b);
         case VT_NUM_BOOL:

@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #include "vm.h"
 #include "value.h"
@@ -74,6 +75,21 @@ void vm_close(vm_t *vm)
 #define POPN(n)     *((vm)->top -= (n))
 #define PEEK(i)     ((vm)->top[-1 - (i)])
 
+static void defineNative(vm_t *vm, const char *name, cfn_t function)
+{
+    val_t native = VAL_CFN(function);
+    val_t gname = VAL_OBJ(str_copy(vm, name, (int)strlen(name)));
+
+    PUSH(gname);
+    tab_set(&vm->globals, AS_STR(gname), native);
+    POP();
+}
+
+static val_t clockNative(vm_t *vm, int argc, val_t *args)
+{
+    return VAL_NUM((double)clock() / CLOCKS_PER_SEC);
+}
+
 static void concatenate(vm_t *vm)
 {
     str_t *b = AS_STR(POP());
@@ -121,6 +137,13 @@ static bool callValue(vm_t *vm, val_t callee, int argCount)
                 // Non-callable object type.                   
                 break;
         }
+    }
+    else if (IS_CFN(callee)) {
+        cfn_t native = AS_CFN(callee);
+        val_t result = native(vm, argCount, vm->top - argCount);
+        vm->top -= argCount + 1;
+        PUSH(result);
+        return true;
     }
 
     runtimeError(vm, "Can only call functions and classes.");
