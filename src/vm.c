@@ -11,6 +11,7 @@
 static void resetStack(vm_t *vm)
 {
     vm->top = vm->stack;
+    vm->frameCount = 0;
 }
 
 static void runtimeError(vm_t *vm, const char *format, ...)
@@ -21,9 +22,11 @@ static void runtimeError(vm_t *vm, const char *format, ...)
     va_end(args);
     fputs("\n", stderr);
 
-    size_t instruction = vm->ip - vm->chunk->code;
-    int line = vm->chunk->lines[instruction];
-    fprintf(stderr, "[line %d] in script\n", line);
+    frame_t *frame = &vm->frames[vm->frameCount - 1];
+    size_t instruction = frame->ip - frame->function->chunk.code;
+    int line = CHUNK_GETLN(&frame->function->chunk, instruction);
+    int column = CHUNK_GETCOL(&frame->function->chunk, instruction);
+    fprintf(stderr, "[%d:%d] in script\n", line, column);
 
     resetStack(vm);
 }
@@ -75,24 +78,40 @@ static void concatenate(vm_t *vm)
 
 static int execute(vm_t *vm)
 {
+    register uint8_t *ip;
+    register frame_t *frame;
 
-#define STACK           (vm->stack)
+#define STORE_FRAME() \
+    frame->ip = ip
 
-#define PREV_BYTE()     (vm->ip[-1])
-#define READ_BYTE()     *(vm->ip++)
-#define READ_SHORT()    (vm->ip += 2, (uint16_t)((vm->ip[-2] << 8) | vm->ip[-1]))
+#define LOAD_FRAME() \
+    frame = &vm->frames[vm->frameCount - 1]; \
+	ip = frame->ip
 
-#define READ_CONST()    (vm)->chunk->constants.values[READ_BYTE()]
-#define READ_CONSTL()   (vm)->chunk->constants.values[READ_SHORT()]
+#define STACK           (frame->slots)
+
+#define PREV_BYTE()     (ip[-1])
+#define READ_BYTE()     *(ip++)
+#define READ_SHORT()    (ip += 2, (uint16_t)((ip[-2] << 8) | ip[-1]))
+
+#define READ_CONST()    frame->function->chunk.constants.values[READ_BYTE()]
+#define READ_CONSTL()   frame->function->chunk.constants.values[READ_SHORT()]
 #define READ_STR()      AS_STR(READ_CONST())
 #define READ_STRL()     AS_STR(READ_CONSTL())
 
-#define ERROR(fmt, ...) do { runtimeError(vm, fmt, ##__VA_ARGS__); return VM_RUNTIME_ERROR; } while (0)
+#define ERROR(fmt, ...) \
+    do { \
+        STORE_FRAME(); \
+        runtimeError(vm, fmt, ##__VA_ARGS__); \
+        return VM_RUNTIME_ERROR; \
+    } while (0)
 
 #define INTERPRET       _loop: switch(READ_BYTE())
 #define CODE(x)         case OP_##x:
 #define CODE_ERR()      default:
 #define NEXT            goto _loop
+
+    LOAD_FRAME();
 
     INTERPRET
     {
@@ -410,13 +429,13 @@ static int execute(vm_t *vm)
 
         CODE(JMP) {
             uint16_t offset = READ_SHORT();
-            vm->ip += offset;
+            ip += offset;
             NEXT;
         }
 
         CODE(JMPF) {
             uint16_t offset = READ_SHORT();
-            if (IS_FALSEY(PEEK(0))) vm->ip += offset;
+            if (IS_FALSEY(PEEK(0))) ip += offset;
             NEXT;
         }
 
@@ -430,21 +449,16 @@ static int execute(vm_t *vm)
 
 int do_string(vm_t *vm, const char *source)
 {
-    chunk_t chunk;
-    chunk_init(&chunk);
+    fun_t *function = compile(vm, NULL, source);
+    if (function == NULL) return VM_COMPILE_ERROR;
 
-    if (!compile(vm, NULL, source, &chunk)) {
-        chunk_free(&chunk);
-        return VM_COMPILE_ERROR;
-    }
+    PUSH(VAL_OBJ(function));
+    frame_t *frame = &vm->frames[vm->frameCount++];
+    frame->function = function;
+    frame->ip = function->chunk.code;
+    frame->slots = vm->stack;
 
-    vm->chunk = &chunk;
-    vm->ip = vm->chunk->code;
-
-    int result = execute(vm);
-
-    chunk_free(&chunk);
-    return result;
+    return execute(vm);
 }
 
 int do_file(vm_t *vm, const char *fname)

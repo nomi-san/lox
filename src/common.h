@@ -16,7 +16,8 @@
 
 #define GROW_CAPACITY(x)    ((x) < 8 ? 8 : (x) * 2)
 
-#define STACK_MAX           256
+#define FRAMES_MAX          64
+#define STACK_MAX           (FRAMES_MAX * UINT8_COUNT)
 
 #define VM_INIT_ERROR       -1
 #define VM_OK               0

@@ -6,11 +6,17 @@
 #include "gc.h"
 #include "table.h"
 
-struct _vm {
+typedef struct {
+    fun_t *function;
     uint8_t *ip;
-    chunk_t *chunk;
-    val_t *top;
+    val_t *slots;
+} frame_t;
+
+struct _vm {   
     val_t stack[STACK_MAX];
+    frame_t frames[FRAMES_MAX];
+    val_t *top;
+    int frameCount;
 
     gc_t gc;
     tab_t strings;
