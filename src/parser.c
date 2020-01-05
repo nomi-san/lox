@@ -674,6 +674,7 @@ static void expressionStatement(parser_t *parser)
     parser->subExprs = 0;
 
     expression(parser);
+    match(parser, TOKEN_SEMICOLON);
 
     if (parser->subExprs <= 1 && !parser->hadCall) {
         error(parser, "Unexpected expression.");
@@ -779,6 +780,9 @@ static void statement(parser_t *parser)
         beginScope(parser);
         block(parser);
         endScope(parser);
+    }
+    else if (match(parser, TOKEN_SEMICOLON)) {
+        // Do nothing.
     }
     else {
         expressionStatement(parser);
