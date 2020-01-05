@@ -706,9 +706,18 @@ static void ifStatement(parser_t *parser)
 
 static void printStatement(parser_t *parser)
 {
-    expression(parser);
+    int count = 0;
 
-    emitByte(parser, OP_PRINT);
+    do {
+        expression(parser);
+        count++;
+        if (count > 32) {
+            error(parser, "Too many values in 'print' statement.");
+            return;
+        }
+    } while (match(parser, TOKEN_COMMA));
+
+    emitBytes(parser, OP_PRINT, count);
 }
 
 static void returnStatement(parser_t *parser)

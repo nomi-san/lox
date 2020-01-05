@@ -70,6 +70,7 @@ void vm_close(vm_t *vm)
 
 #define PUSH(v)     *((vm)->top++) = (v)
 #define POP()       *(--(vm)->top)
+#define POPN(n)     *((vm)->top -= (n))
 #define PEEK(i)     ((vm)->top[-1 - (i)])
 
 static void concatenate(vm_t *vm)
@@ -179,8 +180,15 @@ static int execute(vm_t *vm)
     INTERPRET
     {
         CODE(PRINT) {
-            val_print(POP());
+            int count = READ_BYTE();
+
+            for (int i = count-1; i >= 0; i--) {
+                val_print(PEEK(i));
+                if (i > 0) printf("\t");
+            }
             printf("\n");
+
+            POPN(count);
             NEXT;
         }
 
