@@ -44,7 +44,7 @@
     _CODE(ST)      	/* [s]      [-0, +0]    */
 
 #define _CODE(x)    OP_##x,
-typedef enum { OPCODES() } opcode_t;
+typedef enum { OPCODES() OPCODE_COUNT } opcode_t;
 #undef _CODE
 
 typedef struct {

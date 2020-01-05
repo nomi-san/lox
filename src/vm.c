@@ -169,7 +169,7 @@ static int execute(vm_t *vm)
 #define CODE(x)         _OP_##x:
 #define CODE_ERR()      
 #define NEXT            do { int i = READ_BYTE(); __asm {mov ecx, [i]} __asm {shl ecx, [2]} __asm {jmp _jtab[ecx]} } while (0)
-    static unsigned long _jtab[40];
+    static unsigned long _jtab[OPCODE_COUNT];
     if (_jtab[0] == 0) {
 #define _CODE(x) __asm { mov _jtab[TYPE _jtab * OP_##x], offset _OP_##x }
         OPCODES();
@@ -187,7 +187,7 @@ static int execute(vm_t *vm)
 #define CODE_ERR()      _err:
 #define NEXT            goto *_jtab[READ_BYTE()]
 #define _CODE(x)        &&_OP_##x,
-    static void *_jtab[] = { OPCODES() };
+    static void *_jtab[OPCODE_COUNT] = { OPCODES() };
 #endif
 
     LOAD_FRAME();
