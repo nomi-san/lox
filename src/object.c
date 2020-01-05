@@ -105,7 +105,7 @@ void obj_free(gc_t *gc, obj_t *object)
         }
         case OT_FUN: {
             fun_t *function = (fun_t *)object;
-
+            chunk_free(&function->chunk);
             FREE(gc, fun_t, function);
             break;
         }
