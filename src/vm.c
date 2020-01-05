@@ -163,10 +163,24 @@ static int execute(vm_t *vm)
     } while (0)
 
 #ifdef _MSC_VER
+// Never try the 'computed goto' below on MSVC x86!
+#if 0 //defined(_M_IX86) || (defined(_WIN32) && !defined(_WIN64))
+#define INTERPRET       NEXT;
+#define CODE(x)         _OP_##x:
+#define CODE_ERR()      
+#define NEXT            do { int i = READ_BYTE(); __asm {mov ecx, [i]} __asm {shl ecx, [2]} __asm {jmp _jtab[ecx]} } while (0)
+    static unsigned long _jtab[40];
+    if (_jtab[0] == 0) {
+#define _CODE(x) __asm { mov _jtab[TYPE _jtab * OP_##x], offset _OP_##x }
+        OPCODES();
+#undef _CODE
+    }
+#else
 #define INTERPRET       _loop: switch(READ_BYTE())
 #define CODE(x)         case OP_##x:
 #define CODE_ERR()      default:
 #define NEXT            goto _loop
+#endif
 #else
 #define INTERPRET       NEXT;
 #define CODE(x)         _OP_##x:
