@@ -164,7 +164,7 @@ static int execute(vm_t *vm)
 
 #ifdef _MSC_VER
 // Never try the 'computed goto' below on MSVC x86!
-#if 1 //defined(_M_IX86) || (defined(_WIN32) && !defined(_WIN64))
+#if 0 //defined(_M_IX86) || (defined(_WIN32) && !defined(_WIN64))
 #define INTERPRET       NEXT;
 #define CODE(x)         _OP_##x:
 #define CODE_ERR()      
