@@ -677,7 +677,7 @@ static void expressionStatement(parser_t *parser)
     expression(parser);
     match(parser, TOKEN_SEMICOLON);
 
-    if (parser->subExprs <= 1 && !parser->hadCall) {
+    if (parser->subExprs <= 1 || !parser->hadCall) {
         error(parser, "Unexpected expression.");
         return;
     }
