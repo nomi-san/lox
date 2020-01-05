@@ -7,11 +7,11 @@
 /*        opcodes      args     stack       description */ \
     _CODE(PRINT)   	/* []       [-1, +0]    pop a value from stack */ \
     _CODE(POP)     	/* []       [-1, +0]    pop a value from stack and print it */ \
-    _CODE(CALL)    	/* not implemented yet */ \
-    _CODE(RET)     	/* not implemented yet */ \
+    _CODE(CALL)    	/* [n]      [-n, +1]    */ \
+    _CODE(RET)     	/* []       [-1, +0]    */ \
     _CODE(NIL)     	/* []       [-0, +1]    push nil to stack */ \
     _CODE(TRUE)    	/* []       [-0, +1]    push true to stack */ \
-    _CODE(FALSE)   	/* []       [-0, +1]    push false value to stack */ \
+    _CODE(FALSE)   	/* []       [-0, +1]    push false to stack */ \
     _CODE(CONST)   	/* [k]      [-0, +1]    push a constant from (k) to stack */ \
     _CODE(CONSTL)  	/* [k, k]   [-0, +1]    */ \
     _CODE(NEG)     	/* []       [-1, +1]    */ \
