@@ -1,7 +1,7 @@
 # lox
 The implementation of the **Lox** programming language, with virtual machine in **C**.
 
-#### Current chapter: [Ch.21 Global Variables](http://www.craftinginterpreters.com/global-variables.html)
+#### Current chapter: [Ch.24 Calls and Functions](http://www.craftinginterpreters.com/global-variables.html)
 
 ### todo
 - [x] Cross-platform
