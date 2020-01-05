@@ -190,6 +190,10 @@ static void emitBytesAndConstLong(parser_t *parser, uint8_t op, int arg)
         return;
     }
 #undef CHANGE
+    if (op == OP_LD && arg <= 8) {
+        emitByte(parser, (uint8_t)(OP_LD0 + arg));
+        return;
+    }
     emitBytes(parser, op, (uint8_t)arg);
 }
 
