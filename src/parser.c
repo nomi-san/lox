@@ -17,6 +17,8 @@ struct _parser {
     compiler_t *compiler;
     tok_t current;
     tok_t previous;
+    int subExprs;
+    bool hadCall;
     bool hadError;
     bool panicMode;
 };
@@ -580,8 +582,10 @@ static void parsePrecedence(parser_t *parser, prec_t precedence)
 
     bool canAssign = precedence <= PREC_ASSIGNMENT;
     prefixRule(parser, canAssign);
+    parser->subExprs++;
 
     while (precedence <= getRule(parser->current.type)->precedence) {
+        if (check(parser, TOKEN_LEFT_PAREN)) parser->hadCall = true;
         advance(parser);
         parsefn_t infixRule = getRule(parser->previous.type)->infix;
         infixRule(parser, canAssign);
@@ -660,15 +664,21 @@ static void varDeclaration(parser_t *parser)
     else {
         emitByte(parser, OP_NIL);
     }
-    consume(parser, TOKEN_SEMICOLON, "Expect ';' after variable declaration.");
 
     defineVariable(parser, global);
 }
 
 static void expressionStatement(parser_t *parser)
 {
+    parser->hadCall = false;
+    parser->subExprs = 0;
+
     expression(parser);
-    consume(parser, TOKEN_SEMICOLON, "Expect ';' after expression.");
+
+    if (parser->subExprs <= 1 && !parser->hadCall) {
+        error(parser, "Unexpected expression.");
+        return;
+    }
 
     emitByte(parser, OP_POP);
 }
@@ -695,7 +705,6 @@ static void ifStatement(parser_t *parser)
 static void printStatement(parser_t *parser)
 {
     expression(parser);
-    consume(parser, TOKEN_SEMICOLON, "Expect ';' after value.");
 
     emitByte(parser, OP_PRINT);
 }
@@ -706,12 +715,12 @@ static void returnStatement(parser_t *parser)
         error(parser, "Cannot return from top-level code.");
     }
 
-    if (match(parser, TOKEN_SEMICOLON)) {
+    if (match(parser, TOKEN_SEMICOLON) ||
+        check(parser, TOKEN_RIGHT_BRACE)) {
         emitReturn(parser);
     }
     else {
         expression(parser);
-        consume(parser, TOKEN_SEMICOLON, "Expect ';' after return value.");
         emitByte(parser, OP_RET);
     }
 }
