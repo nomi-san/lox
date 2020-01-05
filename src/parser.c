@@ -437,6 +437,7 @@ static void literal(parser_t *parser, bool canAssign)
         case TOKEN_FALSE:   emitByte(parser, OP_FALSE); break;
         case TOKEN_NIL:     emitByte(parser, OP_NIL); break;
         case TOKEN_TRUE:    emitByte(parser, OP_TRUE); break;
+        case TOKEN_FUN:     emitByte(parser, OP_LD0); break;
         default:
             return; // Unreachable.                   
     }
@@ -552,7 +553,7 @@ static rule_t rules[] = {
     { NULL,     NULL,    PREC_NONE },       // TOKEN_ELSE            
     { literal,  NULL,    PREC_NONE },       // TOKEN_FALSE           
     { NULL,     NULL,    PREC_NONE },       // TOKEN_FOR             
-    { NULL,     NULL,    PREC_NONE },       // TOKEN_FUN             
+    { literal,  NULL,    PREC_NONE },       // TOKEN_FUN             
     { NULL,     NULL,    PREC_NONE },       // TOKEN_IF              
     { literal,  NULL,    PREC_NONE },       // TOKEN_NIL             
     { NULL,     or_,     PREC_OR },         // TOKEN_OR   
