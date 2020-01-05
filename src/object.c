@@ -1,5 +1,5 @@
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "object.h"
@@ -65,12 +65,30 @@ str_t *str_copy(vm_t *vm, const char *chars, int length)
     return allocateString(vm, heapChars, length, hash);
 }
 
+fun_t *fun_new(vm_t *vm)
+{
+    fun_t *function = ALLOC_OBJ(vm, fun_t, OT_FUN);
+
+    function->arity = 0;
+    function->name = NULL;
+    chunk_init(&function->chunk);
+    return function;
+}
+
 void obj_print(obj_t *object)
 {
     switch (object->type) {
         case OT_STR: {
             str_t *string = (str_t *)object;
             printf("%.*s", string->length, string->chars);
+            break;
+        }
+        case OT_FUN: {
+            fun_t *function = (fun_t *)object;
+            if (function->name == NULL)
+                printf("<script>");
+            else
+                printf("fn: %s", function->name->chars);
             break;
         }
     }
@@ -82,7 +100,13 @@ void obj_free(gc_t *gc, obj_t *object)
         case OT_STR: {
             str_t *string = (str_t *)object;
             free(string->chars);
-            FREE(gc, str_t, object);
+            FREE(gc, str_t, string);
+            break;
+        }
+        case OT_FUN: {
+            fun_t *function = (fun_t *)object;
+
+            FREE(gc, fun_t, function);
             break;
         }
     }

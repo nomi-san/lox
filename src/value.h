@@ -4,6 +4,7 @@
 
 typedef struct _obj obj_t;
 typedef struct _str str_t;
+typedef struct _fun fun_t;
 
 typedef enum {
     VT_NIL,
