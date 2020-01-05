@@ -258,7 +258,7 @@ static int execute(vm_t *vm)
         CODE(NEG) {
             switch (AS_TYPE(PEEK(0))) {
                 case VT_BOOL:
-                    PUSH(VAL_NUM((double)AS_BOOL(POP())));
+                    PUSH(VAL_NUM(-(char)AS_BOOL(POP())));
                     NEXT;
                 case VT_NUM:
                     PUSH(VAL_NUM(-AS_NUM(POP())));
