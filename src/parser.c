@@ -48,8 +48,15 @@ typedef struct {
     int depth;
 } local_t;
 
+typedef enum {
+    TYPE_FUNCTION,
+    TYPE_SCRIPT
+} funtype_t;
+
 struct _compiler
 {
+    fun_t *function;
+    funtype_t type;
     local_t locals[UINT8_COUNT];
     int localCount;
     int scopeDepth;
@@ -57,7 +64,7 @@ struct _compiler
 
 static chunk_t *currentChunk(parser_t *parser)
 {
-    return parser->compilingChunk;
+    return &parser->compiler->function->chunk;
 }
 
 static void errorAt(parser_t *parser, tok_t *token, const char *message)
@@ -203,22 +210,34 @@ static void patchJump(parser_t *parser, int offset)
     currentChunk(parser)->code[offset + 1] = jump & 0xff;
 }
 
-static void initCompiler(parser_t *parser, compiler_t *compiler)
+static void initCompiler(parser_t *parser, compiler_t *compiler, funtype_t type)
 {
+    compiler->function = NULL;
+    compiler->type = type;
     compiler->localCount = 0;
     compiler->scopeDepth = 0;
+    compiler->function = fun_new(parser->vm);
+
+    local_t *local = &compiler->locals[compiler->localCount++];
+    local->depth = 0;
+    local->name.start = "";
+    local->name.length = 0;
+
     parser->compiler = compiler;
 }
 
-static void endCompiler(parser_t *parser)
+static fun_t *endCompiler(parser_t *parser)
 {
     emitReturn(parser);
+    fun_t *function = parser->compiler->function;
 
 #ifdef DEBUG_PRINT_CODE                      
     if (!parser->hadError) {
         //disassembleChunk(currentChunk(parser), "code");
     }
 #endif
+
+    return function;
 }
 
 static void beginScope(parser_t *parser)
@@ -657,25 +676,25 @@ static void statement(parser_t *parser)
     }
 }
 
-bool compile(vm_t *vm, const char *fname, const char *source, chunk_t *chunk)
+fun_t *compile(vm_t *vm, const char *fname, const char *source)
 {
     lexer_t lexer;
     parser_t parser;
     compiler_t compiler;
 
-    lexer_init(&lexer, vm, fname, source);
-    initCompiler(&parser, &compiler);
     parser.vm = vm;
-    parser.compilingChunk = chunk;
     parser.lexer = &lexer;
     parser.hadError = false;
     parser.panicMode = false;
+
+    lexer_init(&lexer, vm, fname, source);
+    initCompiler(&parser, &compiler, TYPE_SCRIPT);
     
     advance(&parser);
     while (!match(&parser, TOKEN_EOF)) {
         declaration(&parser);
     }
 
-    endCompiler(&parser);
-    return !parser.hadError;
+    fun_t *function = endCompiler(&parser);
+    return parser.hadError ? NULL : function;
 }
