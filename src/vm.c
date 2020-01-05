@@ -128,6 +128,8 @@ static bool callValue(vm_t *vm, val_t callee, int argCount)
 static int execute(vm_t *vm)
 {
     register uint8_t *ip;
+    register val_t *stack;
+    register val_t *consts;
     register frame_t *frame;
 
 #define STORE_FRAME() \
@@ -135,16 +137,19 @@ static int execute(vm_t *vm)
 
 #define LOAD_FRAME() \
     frame = &vm->frames[vm->frameCount - 1]; \
-	ip = frame->ip
+	ip = frame->ip; \
+    stack = frame->slots; \
+    consts = frame->function->chunk.constants.values
 
-#define STACK           (frame->slots)
+#define STACK           (stack)
+#define CONSTS          (consts)
 
 #define PREV_BYTE()     (ip[-1])
 #define READ_BYTE()     *(ip++)
 #define READ_SHORT()    (ip += 2, (uint16_t)((ip[-2] << 8) | ip[-1]))
 
-#define READ_CONST()    frame->function->chunk.constants.values[READ_BYTE()]
-#define READ_CONSTL()   frame->function->chunk.constants.values[READ_SHORT()]
+#define READ_CONST()    CONSTS[READ_BYTE()]
+#define READ_CONSTL()   CONSTS[READ_SHORT()]
 #define READ_STR()      AS_STR(READ_CONST())
 #define READ_STRL()     AS_STR(READ_CONSTL())
 
