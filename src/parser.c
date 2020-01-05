@@ -585,6 +585,7 @@ static void parsePrecedence(parser_t *parser, prec_t precedence)
     parser->subExprs++;
 
     while (precedence <= getRule(parser->current.type)->precedence) {
+        if (parser->current.line > parser->previous.line) break;
         if (check(parser, TOKEN_LEFT_PAREN)) parser->hadCall = true;
         advance(parser);
         parsefn_t infixRule = getRule(parser->previous.type)->infix;
