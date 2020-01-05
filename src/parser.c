@@ -55,6 +55,7 @@ typedef enum {
 
 struct _compiler
 {
+    compiler_t *enclosing;
     fun_t *function;
     funtype_t type;
     local_t locals[UINT8_COUNT];
@@ -212,11 +213,17 @@ static void patchJump(parser_t *parser, int offset)
 
 static void initCompiler(parser_t *parser, compiler_t *compiler, funtype_t type)
 {
+    compiler->enclosing = parser->compiler;
     compiler->function = NULL;
     compiler->type = type;
     compiler->localCount = 0;
     compiler->scopeDepth = 0;
     compiler->function = fun_new(parser->vm);
+
+    if (type != TYPE_SCRIPT) {
+        compiler->function->name = str_copy(parser->vm, parser->previous.start,
+            parser->previous.length);
+    }
 
     local_t *local = &compiler->locals[compiler->localCount++];
     local->depth = 0;
@@ -237,6 +244,7 @@ static fun_t *endCompiler(parser_t *parser)
     }
 #endif
 
+    parser->compiler = parser->compiler->enclosing;
     return function;
 }
 
@@ -341,6 +349,8 @@ static uint16_t parseVariable(parser_t *parser, const char *errorMessage)
 static void markInitialized(parser_t *parser)
 {
     compiler_t *current = parser->compiler;
+
+    if (current->scopeDepth == 0) return;
     current->locals[current->localCount - 1].depth =
         current->scopeDepth;
 }
@@ -572,6 +582,45 @@ static void block(parser_t *parser)
     consume(parser, TOKEN_RIGHT_BRACE, "Expect '}' after block.");
 }
 
+static void function(parser_t *parser, funtype_t type)
+{
+    compiler_t compiler;
+    initCompiler(parser, &compiler, type);
+    beginScope(parser);
+
+    // Compile the parameter list.                                
+    consume(parser, TOKEN_LEFT_PAREN, "Expect '(' after function name.");
+    if (!check(parser, TOKEN_RIGHT_PAREN)) {
+        do {
+            int arity = ++parser->compiler->function->arity;
+            if (arity > 32) {
+                errorAtCurrent(parser, "Cannot have more than 32 parameters.");
+            }
+            uint16_t paramConstant = parseVariable(parser, "Expect parameter name.");
+            defineVariable(parser, paramConstant);
+        } while (match(parser, TOKEN_COMMA));
+    }
+    consume(parser, TOKEN_RIGHT_PAREN, "Expect ')' after parameters.");
+
+    // The body.                                                  
+    consume(parser, TOKEN_LEFT_BRACE, "Expect '{' before function body.");
+    block(parser);
+
+    // Create the function object.                                
+    fun_t *function = endCompiler(parser);
+    uint16_t constant = makeConstant(parser, VAL_OBJ(function));
+
+    emitBytesAndConstLong(parser, OP_CONST, constant);
+}
+
+static void funDeclaration(parser_t *parser)
+{
+    uint16_t global = parseVariable(parser, "Expect function name.");
+    markInitialized(parser);
+    function(parser, TYPE_FUNCTION);
+    defineVariable(parser, global);
+}
+
 static void varDeclaration(parser_t *parser)
 {
     uint16_t global = parseVariable(parser, "Expect variable name.");
@@ -648,7 +697,10 @@ static void synchronize(parser_t *parser)
 
 static void declaration(parser_t *parser)
 {
-    if (match(parser, TOKEN_VAR)) {
+    if (match(parser, TOKEN_FUN)) {
+        funDeclaration(parser);
+    }
+    else if (match(parser, TOKEN_VAR)) {
         varDeclaration(parser);
     }
     else {
@@ -684,6 +736,7 @@ fun_t *compile(vm_t *vm, const char *fname, const char *source)
 
     parser.vm = vm;
     parser.lexer = &lexer;
+    parser.compiler = NULL;
     parser.hadError = false;
     parser.panicMode = false;
 
