@@ -3,14 +3,10 @@
 
 #include "lexer.h"
 
-void lexer_init(lexer_t *lexer, vm_t *vm, const char *fname, const char *source)
+void lexer_init(lexer_t *lexer, src_t *source)
 {
-    lexer->vm = vm;
-    lexer->fname = fname;
-    lexer->source = source;
-
-    lexer->start = lexer->source;
-    lexer->current = lexer->source;
+    lexer->start = source->buffer;
+    lexer->current = source->buffer;
     lexer->line = 1;
     lexer->position = 1;
 }

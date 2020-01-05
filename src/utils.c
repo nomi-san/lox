@@ -53,3 +53,27 @@ _clean:
     free(buffer);
     return NULL;
 }
+
+src_t *src_new(const char *fname)
+{
+    src_t *source = malloc(sizeof(src_t));
+    if (source == NULL) return NULL;
+
+    source->fname = fname;
+    source->buffer = read_file(fname, &source->size);
+
+    if (source->buffer == NULL) {
+        free(source);
+        return NULL;
+    }
+
+    return source;
+}
+
+void src_free(src_t *source)
+{
+    if (source == NULL) return;
+
+    free(source->buffer);
+    free(source);
+}

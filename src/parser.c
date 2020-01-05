@@ -14,6 +14,7 @@ struct _parser {
     vm_t *vm;
     chunk_t *compilingChunk;
     lexer_t *lexer;
+    src_t *source;
     compiler_t *compiler;
     tok_t current;
     tok_t previous;
@@ -225,7 +226,7 @@ static void initCompiler(parser_t *parser, compiler_t *compiler, funtype_t type)
     compiler->type = type;
     compiler->localCount = 0;
     compiler->scopeDepth = 0;
-    compiler->function = fun_new(parser->vm);
+    compiler->function = fun_new(parser->vm, parser->source);
 
     if (type != TYPE_SCRIPT) {
         compiler->function->name = str_copy(parser->vm, parser->previous.start,
@@ -799,19 +800,20 @@ static void statement(parser_t *parser)
     }
 }
 
-fun_t *compile(vm_t *vm, const char *fname, const char *source)
+fun_t *compile(vm_t *vm, src_t *source)
 {
     lexer_t lexer;
     parser_t parser;
     compiler_t compiler;
 
     parser.vm = vm;
+    parser.source = source;
     parser.lexer = &lexer;
     parser.compiler = NULL;
     parser.hadError = false;
     parser.panicMode = false;
 
-    lexer_init(&lexer, vm, fname, source);
+    lexer_init(&lexer, source);
     initCompiler(&parser, &compiler, TYPE_SCRIPT);
     
     advance(&parser);

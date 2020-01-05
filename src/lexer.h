@@ -38,13 +38,11 @@ typedef struct {
 
 typedef struct {
     vm_t *vm;
-    const char *fname;
-    const char *source;
     const char *start;
     const char *current;
     int line;
     int position;
 } lexer_t;
 
-void lexer_init(lexer_t *lexer, vm_t *vm, const char *fname, const char *source);
+void lexer_init(lexer_t *lexer, src_t *source);
 tok_t lexer_scan(lexer_t *lexer);

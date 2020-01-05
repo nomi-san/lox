@@ -14,7 +14,7 @@ int main(int argc, char **argv)
 
     if (vm != NULL) {
         clock_t clk = clock();
-        ret = do_file(vm, argv[argc - 1]);
+        ret = vm_dofile(vm, argv[argc - 1]);
         printf("\ndone in %.3gs\n", (clock()-clk)/(double)CLOCKS_PER_SEC);
         vm_close(vm);
     }

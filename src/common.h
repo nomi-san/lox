@@ -30,5 +30,14 @@ typedef struct _val val_t;
 typedef struct _vm  vm_t;
 typedef struct _gc  gc_t;
 
+typedef struct {
+    char *buffer;
+    size_t size;
+    const char *fname;
+} src_t;
+
 uint32_t hash_bytes(const void *bytes, size_t size);
 char *read_file(const char *path, size_t *size);
+
+src_t *src_new(const char *fname);
+void src_free(src_t *source);

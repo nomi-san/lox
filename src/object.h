@@ -37,7 +37,7 @@ static inline bool obj_is(val_t value, otype_t type) {
 
 str_t *str_take(vm_t *vm, char *chars, int length);
 str_t *str_copy(vm_t *vm, const char *chars, int length);
-fun_t *fun_new(vm_t *vm);
+fun_t *fun_new(vm_t *vm, src_t *source);
 
 void obj_print(obj_t *object);
 void obj_free(gc_t *gc, obj_t *object);

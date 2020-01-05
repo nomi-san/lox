@@ -3,12 +3,13 @@
 
 #include "chunk.h"
 
-void chunk_init(chunk_t *chunk)
+void chunk_init(chunk_t *chunk, src_t *source)
 {
     chunk->count = 0;
     chunk->capacity = 0;
     chunk->code = NULL;
     chunk->lines = NULL;
+    chunk->source = source;
 
     arr_init(&chunk->constants);
 }
@@ -19,7 +20,7 @@ void chunk_free(chunk_t *chunk)
     free(chunk->lines);
 
     arr_free(&chunk->constants);
-    chunk_init(chunk);
+    chunk_init(chunk, NULL);
 }
 
 void chunk_emit(chunk_t *chunk, uint8_t byte, int ln, int col)

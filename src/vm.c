@@ -539,26 +539,23 @@ static int execute(vm_t *vm)
     return VM_OK;
 }
 
-int do_string(vm_t *vm, const char *source)
+int vm_dofile(vm_t *vm, const char *fname)
 {
-    fun_t *function = compile(vm, NULL, source);
-    if (function == NULL) return VM_COMPILE_ERROR;
+    int result = VM_COMPILE_ERROR;
+    src_t *source = src_new(fname);
 
-    val_t script = VAL_OBJ(function);
+    if (source != NULL) {
+        fun_t *function = compile(vm, source);
+        if (function == NULL) return VM_COMPILE_ERROR;
 
-    PUSH(script);
-    callValue(vm, script, 0);
+        val_t script = VAL_OBJ(function);
 
-    return execute(vm);
-}
+        PUSH(script);
+        callValue(vm, script, 0);
 
-int do_file(vm_t *vm, const char *fname)
-{
-    char *source = read_file(fname, NULL);
-    if (source == NULL) return VM_COMPILE_ERROR;
+        result = execute(vm);  
+    }
 
-    int result = do_string(vm, source);
-
-    free(source);
+    src_free(source);
     return result;
 }

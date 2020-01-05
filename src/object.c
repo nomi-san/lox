@@ -65,13 +65,13 @@ str_t *str_copy(vm_t *vm, const char *chars, int length)
     return allocateString(vm, heapChars, length, hash);
 }
 
-fun_t *fun_new(vm_t *vm)
+fun_t *fun_new(vm_t *vm, src_t *source)
 {
     fun_t *function = ALLOC_OBJ(vm, fun_t, OT_FUN);
 
     function->arity = 0;
     function->name = NULL;
-    chunk_init(&function->chunk);
+    chunk_init(&function->chunk, source);
     return function;
 }
 
