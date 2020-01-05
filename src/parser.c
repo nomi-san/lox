@@ -177,7 +177,7 @@ static uint16_t makeConstant(parser_t *parser, val_t value)
     return (uint16_t)constant;
 }
 
-static void emitBytesAndConstLong(parser_t *parser, uint8_t op, int arg)
+static void emitSmart(parser_t *parser, uint8_t op, int arg)
 {
 #define CHANGE(x)   (op == x) op = x##L
     if (arg > UINT8_MAX) {
@@ -200,7 +200,7 @@ static void emitBytesAndConstLong(parser_t *parser, uint8_t op, int arg)
 static void emitConstant(parser_t *parser, val_t value)
 {
     uint16_t constant = makeConstant(parser, value);
-    emitBytesAndConstLong(parser, OP_CONST, constant);
+    emitSmart(parser, OP_CONST, constant);
 }
 
 static void patchJump(parser_t *parser, int offset)
@@ -367,7 +367,7 @@ static void defineVariable(parser_t *parser, uint16_t global)
         return;
     }
 
-    emitBytesAndConstLong(parser, OP_DEF, global);
+    emitSmart(parser, OP_DEF, global);
 }
 
 static uint8_t argumentList(parser_t *parser)
@@ -480,10 +480,10 @@ static void namedVariable(parser_t *parser, tok_t name, bool canAssign)
 
     if (canAssign && match(parser, TOKEN_EQUAL)) {
         expression(parser);
-        emitBytesAndConstLong(parser, setOp, arg);
+        emitSmart(parser, setOp, arg);
     }
     else {
-        emitBytesAndConstLong(parser, getOp, arg);
+        emitSmart(parser, getOp, arg);
     }
 }
 
@@ -639,7 +639,7 @@ static void function(parser_t *parser, funtype_t type)
     fun_t *function = endCompiler(parser);
     uint16_t constant = makeConstant(parser, VAL_OBJ(function));
 
-    emitBytesAndConstLong(parser, OP_CONST, constant);
+    emitSmart(parser, OP_CONST, constant);
 }
 
 static void funDeclaration(parser_t *parser)
