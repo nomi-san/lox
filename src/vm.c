@@ -236,14 +236,12 @@ static int execute(vm_t *vm)
             switch (AS_TYPE(PEEK(0))) {
                 case VT_BOOL:
                     PUSH(VAL_NUM((double)AS_BOOL(POP())));
-                    break;
+                    NEXT;
                 case VT_NUM:
                     PUSH(VAL_NUM(-AS_NUM(POP())));
-                    break;
-                default:
-                    ERROR("Operands must be a number/boolean.");
+                    NEXT;
             }
-            NEXT;
+            ERROR("Operands must be a number/boolean.");
         }
 
         CODE(EQ) {
