@@ -20,7 +20,10 @@ uint32_t hash_bytes(const void *bytes, size_t size)
 
 char *read_file(const char *path, size_t *size)
 {
-    FILE *file = fopen(path, "rb");
+    FILE *file = NULL;
+    char *buffer = NULL;
+
+    file = fopen(path, "rb");
     if (file == NULL) {
         fprintf(stderr, "Could not open file \"%s\".\n", path);
         goto _clean;
@@ -30,7 +33,7 @@ char *read_file(const char *path, size_t *size)
     size_t fileSize = ftell(file);
     rewind(file);
 
-    char *buffer = malloc(fileSize + 1);
+    buffer = malloc(fileSize + 1);
     if (buffer == NULL) {
         fprintf(stderr, "Not enough memory to read \"%s\".\n", path);
         goto _clean;
@@ -50,7 +53,7 @@ char *read_file(const char *path, size_t *size)
 
 _clean:
     if (file != NULL) fclose(file);
-    free(buffer);
+    if (buffer != NULL) free(buffer);
     return NULL;
 }
 
@@ -65,8 +68,9 @@ src_t *src_new(const char *fname)
         return NULL;
     }
 
-    const char *s = strrchr(fname, '/');
-    if (s == NULL) s = strrchr(fname, '\\');
+    const char *s;     
+    if ((s = strrchr(fname, '/')) != NULL) s++;
+    if ((s = strrchr(fname, '\\')) != NULL) s++;
     if (s == NULL) s = fname;
 
     source->fname = strdup(s);
