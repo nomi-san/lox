@@ -3,46 +3,49 @@
 #include "common.h"
 #include "value.h"
 
-typedef enum {
-//  opcodes        args      stack      description //
-    OP_PRINT,   /* []       [-1, +0]    pop a value from stack */
-    OP_POP,     /* []       [-1, +0]    pop a value from stack and print it */
-    OP_CALL,    /* not implemented yet */
-    OP_RET,     /* not implemented yet */
-    OP_NIL,     /* []       [-0, +1]    push nil to stack */
-    OP_TRUE,    /* []       [-0, +1]    push true to stack */
-    OP_FALSE,   /* []       [-0, +1]    push false value to stack */
-    OP_CONST,   /* [k]      [-0, +1]    push a constant from (k) to stack */
-    OP_CONSTL,  /* [k, k]   [-0, +1]    */
-    OP_NEG,     /* []       [-1, +1]    */
-    OP_NOT,     /* []       [-1, +1]    */
-    OP_LT,      /* []       [-1, +1]    */
-    OP_LE,      /* []       [-1, +1]    */
-    OP_EQ,      /* []       [-1, +1]    */
-    OP_ADD,     /* []       [-2, +1]    */
-    OP_SUB,     /* []       [-2, +1]    */
-    OP_MUL,     /* []       [-2, +1]    */
-    OP_DIV,     /* []       [-2, +1]    */
-    OP_DEF,     /* [k]      [-1, +0]    pop a value from stack and define as (k) in global */
-    OP_GLD,     /* [k]      [-0, +1]    push a from (k) in global to stack */
-    OP_GST,     /* [k]      [-0, +0]    set a value from stack as (k) in global */
-    OP_DEFL,    /* [k, k]   [-1, +0]    */
-    OP_GLDL,    /* [k, k]   [-0, +1]    */
-    OP_GSTL,    /* [k, k]   [-0, +0]    */
-    OP_JMP,     /* [s, s]   [-0, +0]    */
-    OP_JMPF,    /* [s, s]   [-1, +0]    */
-    OP_LD,      /* [s]      [-0, +1]    */
-    OP_LD0,     /* []       [-0, +1]    */
-    OP_LD1,     /* []       [-0, +1]    */
-    OP_LD2,     /* []       [-0, +1]    */
-    OP_LD3,     /* []       [-0, +1]    */
-    OP_LD4,     /* []       [-0, +1]    */
-    OP_LD5,     /* []       [-0, +1]    */
-    OP_LD6,     /* []       [-0, +1]    */
-    OP_LD7,     /* []       [-0, +1]    */
-    OP_LD8,     /* []       [-0, +1]    */
-    OP_ST,      /* [s]      [-0, +0]    */
-} opcode_t;
+#define OPCODES() \
+/*        opcodes      args     stack       description */ \
+    _CODE(PRINT)   	/* []       [-1, +0]    pop a value from stack */ \
+    _CODE(POP)     	/* []       [-1, +0]    pop a value from stack and print it */ \
+    _CODE(CALL)    	/* not implemented yet */ \
+    _CODE(RET)     	/* not implemented yet */ \
+    _CODE(NIL)     	/* []       [-0, +1]    push nil to stack */ \
+    _CODE(TRUE)    	/* []       [-0, +1]    push true to stack */ \
+    _CODE(FALSE)   	/* []       [-0, +1]    push false value to stack */ \
+    _CODE(CONST)   	/* [k]      [-0, +1]    push a constant from (k) to stack */ \
+    _CODE(CONSTL)  	/* [k, k]   [-0, +1]    */ \
+    _CODE(NEG)     	/* []       [-1, +1]    */ \
+    _CODE(NOT)     	/* []       [-1, +1]    */ \
+    _CODE(LT)      	/* []       [-1, +1]    */ \
+    _CODE(LE)      	/* []       [-1, +1]    */ \
+    _CODE(EQ)      	/* []       [-1, +1]    */ \
+    _CODE(ADD)     	/* []       [-2, +1]    */ \
+    _CODE(SUB)     	/* []       [-2, +1]    */ \
+    _CODE(MUL)     	/* []       [-2, +1]    */ \
+    _CODE(DIV)     	/* []       [-2, +1]    */ \
+    _CODE(DEF)     	/* [k]      [-1, +0]    pop a value from stack and define as (k) in global */ \
+    _CODE(GLD)     	/* [k]      [-0, +1]    push a from (k) in global to stack */ \
+    _CODE(GST)     	/* [k]      [-0, +0]    set a value from stack as (k) in global */ \
+    _CODE(DEFL)    	/* [k, k]   [-1, +0]    */ \
+    _CODE(GLDL)    	/* [k, k]   [-0, +1]    */ \
+    _CODE(GSTL)    	/* [k, k]   [-0, +0]    */ \
+    _CODE(JMP)     	/* [s, s]   [-0, +0]    */ \
+    _CODE(JMPF)    	/* [s, s]   [-1, +0]    */ \
+    _CODE(LD)      	/* [s]      [-0, +1]    */ \
+    _CODE(LD0)     	/* []       [-0, +1]    */ \
+    _CODE(LD1)     	/* []       [-0, +1]    */ \
+    _CODE(LD2)     	/* []       [-0, +1]    */ \
+    _CODE(LD3)     	/* []       [-0, +1]    */ \
+    _CODE(LD4)     	/* []       [-0, +1]    */ \
+    _CODE(LD5)     	/* []       [-0, +1]    */ \
+    _CODE(LD6)     	/* []       [-0, +1]    */ \
+    _CODE(LD7)     	/* []       [-0, +1]    */ \
+    _CODE(LD8)     	/* []       [-0, +1]    */ \
+    _CODE(ST)      	/* [s]      [-0, +0]    */
+
+#define _CODE(x)    OP_##x,
+typedef enum { OPCODES() } opcode_t;
+#undef _CODE
 
 typedef struct {
     int count;

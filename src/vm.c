@@ -160,10 +160,19 @@ static int execute(vm_t *vm)
         return VM_RUNTIME_ERROR; \
     } while (0)
 
+#ifdef _MSC_VER
 #define INTERPRET       _loop: switch(READ_BYTE())
 #define CODE(x)         case OP_##x:
 #define CODE_ERR()      default:
 #define NEXT            goto _loop
+#else
+#define INTERPRET       NEXT;
+#define CODE(x)         _OP_##x:
+#define CODE_ERR()      _err:
+#define NEXT            goto *_jtab[READ_BYTE()]
+#define _CODE(x)        &&_OP_##x,
+    static void *_jtab[] = { OPCODES() };
+#endif
 
     LOAD_FRAME();
 
