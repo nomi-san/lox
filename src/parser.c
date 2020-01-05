@@ -695,6 +695,22 @@ static void printStatement(parser_t *parser)
     emitByte(parser, OP_PRINT);
 }
 
+static void returnStatement(parser_t *parser)
+{
+    if (parser->compiler->type == TYPE_SCRIPT) {
+        error(parser, "Cannot return from top-level code.");
+    }
+
+    if (match(parser, TOKEN_SEMICOLON)) {
+        emitReturn(parser);
+    }
+    else {
+        expression(parser);
+        consume(parser, TOKEN_SEMICOLON, "Expect ';' after return value.");
+        emitByte(parser, OP_RET);
+    }
+}
+
 static void synchronize(parser_t *parser)
 {
     parser->panicMode = false;
@@ -741,6 +757,9 @@ static void statement(parser_t *parser)
     }
     else if (match(parser, TOKEN_IF)) {
         ifStatement(parser);
+    }
+    else if (match(parser, TOKEN_RETURN)) {
+        returnStatement(parser);
     }
     else if (match(parser, TOKEN_LEFT_BRACE)) {
         beginScope(parser);
