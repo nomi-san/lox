@@ -4,6 +4,22 @@
 #include "value.h"
 #include "object.h"
 
+const char *val_typeof(val_t value)
+{
+    switch (AS_TYPE(value)) {
+        case VT_NIL:
+            return "nil";
+        case VT_BOOL:
+            return "bool";
+        case VT_NUM:
+            return "num";
+        case VT_CFN:
+            return "fn";
+        case VT_OBJ:
+            return obj_typeof(AS_OBJ(value));
+    }
+}
+
 void val_print(val_t value)
 {
     switch (AS_TYPE(value)) {

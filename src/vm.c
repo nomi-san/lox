@@ -19,6 +19,7 @@ static void runtimeError(vm_t *vm, const char *format, ...)
 {
     va_list args;
     va_start(args, format);
+    fprintf(stderr, "Error: ");
     vfprintf(stderr, format, args);
     va_end(args);
     fputs("\n", stderr);
@@ -41,6 +42,7 @@ static void runtimeError(vm_t *vm, const char *format, ...)
         }
     }
 
+    fflush(stderr);
     resetStack(vm);
 }
 

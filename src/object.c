@@ -75,6 +75,18 @@ fun_t *fun_new(vm_t *vm, src_t *source)
     return function;
 }
 
+const char *obj_typeof(obj_t *object)
+{
+    switch (object->type) {
+        case OT_STR:
+            return "str";
+        case OT_FUN:
+            return "fn";
+        default:
+            return "obj";
+    }
+}
+
 void obj_print(obj_t *object)
 {
     switch (object->type) {
@@ -91,6 +103,9 @@ void obj_print(obj_t *object)
                 printf("fn: %s", function->name->chars);
             break;
         }
+        default:
+            printf("obj: %p", object);
+            break;
     }
 }
 
