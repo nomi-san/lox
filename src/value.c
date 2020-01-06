@@ -7,6 +7,7 @@
 const char *val_typeof(val_t value)
 {
     switch (AS_TYPE(value)) {
+        default:
         case VT_NIL:
             return "nil";
         case VT_BOOL:

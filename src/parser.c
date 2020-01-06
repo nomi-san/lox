@@ -511,8 +511,17 @@ static void string(parser_t *parser, bool canAssign)
 
 static void map(parser_t *parser, bool canAssign)
 {
+    uint8_t count = 0;
+
+    if (!check(parser, TOKEN_RIGHT_BRACKET)) {
+        do {
+            expression(parser);
+            count++;
+        } while (match(parser, TOKEN_COMMA));
+    }
+
     consume(parser, TOKEN_RIGHT_BRACKET, "Expected closing ']'.");
-    emitByte(parser, OP_MAP);
+    emitBytes(parser, OP_MAP, count);
 }
 
 static void namedVariable(parser_t *parser, tok_t name, bool canAssign)

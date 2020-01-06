@@ -572,7 +572,14 @@ static int execute(vm_t *vm)
         }
 
         CODE(MAP) {
+            uint8_t count = READ_BYTE();
             map_t *map = map_new(vm, 0, 0);
+
+            for (int i = count - 1; i >= 0; i--) {
+                arr_add(&map->array, PEEK(i), true);
+            }
+
+            POPN(count);
             PUSH(VAL_OBJ(map));
             NEXT;
         }
