@@ -2,6 +2,7 @@
 
 #include "value.h"
 #include "chunk.h"
+#include "table.h"
 
 struct _obj {
     otype_t type;
@@ -22,6 +23,12 @@ struct _fun {
     str_t *name;
 };
 
+struct _map {
+    obj_t obj;
+    arr_t array;
+    tab_t table;
+};
+
 #define AS_STR(v)       ((str_t *)AS_OBJ(v))
 #define AS_CSTR(v)      (((str_t *)AS_OBJ(v))->chars)
 #define AS_FUN(v)       ((fun_t *)AS_OBJ(v))
@@ -38,6 +45,7 @@ static inline bool obj_is(val_t value, otype_t type) {
 str_t *str_take(vm_t *vm, char *chars, int length);
 str_t *str_copy(vm_t *vm, const char *chars, int length);
 fun_t *fun_new(vm_t *vm, src_t *source);
+map_t *map_new(vm_t *vm, int arr_cap, int tab_cap);
 
 const char *obj_typeof(obj_t *object);
 void obj_print(obj_t *object);

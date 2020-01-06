@@ -75,6 +75,16 @@ fun_t *fun_new(vm_t *vm, src_t *source)
     return function;
 }
 
+map_t *map_new(vm_t *vm, int arr_cap, int tab_cap)
+{
+    map_t *map = ALLOC_OBJ(vm, map_t, OT_MAP);
+
+    arr_init(&map->array);
+    tab_init(&map->table);
+    // todo
+    return map;
+}
+
 const char *obj_typeof(obj_t *object)
 {
     switch (object->type) {
@@ -122,6 +132,13 @@ void obj_free(gc_t *gc, obj_t *object)
             fun_t *function = (fun_t *)object;
             chunk_free(&function->chunk);
             FREE(gc, fun_t, function);
+            break;
+        }
+        case OT_MAP: {
+            map_t *map = (map_t *)object;
+            arr_free(&map->array);
+            tab_free(&map->table);
+            FREE(gc, map_t, map);
             break;
         }
     }

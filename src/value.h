@@ -5,6 +5,7 @@
 typedef struct _obj obj_t;
 typedef struct _str str_t;
 typedef struct _fun fun_t;
+typedef struct _map map_t;
 
 typedef enum {
     VT_NIL,
@@ -17,6 +18,7 @@ typedef enum {
 typedef enum {
     OT_STR,
     OT_FUN,
+    OT_MAP
 } otype_t;
 
 enum {
