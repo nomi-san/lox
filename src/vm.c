@@ -608,6 +608,53 @@ static int execute(vm_t *vm)
             NEXT;
         }
 
+        CODE(GETI) {
+            if (IS_MAP(PEEK(1))) {
+                if (!IS_NUM(PEEK(0))) {
+                    ERROR("Operands must be a number.");
+                }
+
+                map_t *map = AS_MAP(PEEK(1));
+                int index = (int)AS_NUM(PEEK(0));
+
+                if (index >= map->array.count) {
+                    ERROR("The index out of bound map.");
+                }
+
+                POP();
+                POP();
+                PUSH(map->array.values[index]);
+            }
+            else {
+                ERROR("Operands must be a map.");
+            }
+            NEXT;
+        }
+
+        CODE(SETI) {
+            if (IS_MAP(PEEK(2))) {
+                if (!IS_NUM(PEEK(1))) {
+                    ERROR("Operands must be a number.");
+                }
+
+                map_t *map = AS_MAP(PEEK(2));
+                int index = (int)AS_NUM(PEEK(1));   
+
+                if (index >= map->array.count) {
+                    ERROR("The index out of bound map.");
+                }
+
+                map->array.values[index] = POP();
+                POP();
+                POP();
+                PUSH(PEEK(0));
+            }
+            else {
+                ERROR("Operands must be a map.");
+            }
+            NEXT;
+        }
+
         CODE_ERR() {
             ERROR("Bad opcode, got %d!", PREV_BYTE());
         }

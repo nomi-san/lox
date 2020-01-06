@@ -43,8 +43,10 @@
     _CODE(LD8)     	/* []       [-0, +1]    */ \
     _CODE(ST)      	/* [s]      [-0, +0]    */ \
     _CODE(MAP)      /* []       [-0, +1]    */ \
-    _CODE(GET)                                 \
-    _CODE(SET)
+    _CODE(GET)      \
+    _CODE(SET)      \
+    _CODE(GETI)     \
+    _CODE(SETI)
 
 #define _CODE(x)    OP_##x,
 typedef enum { OPCODES() OPCODE_COUNT } opcode_t;

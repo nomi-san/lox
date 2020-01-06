@@ -461,6 +461,22 @@ static void dot(parser_t *parser, bool canAssign)
     }
 }
 
+static void index_(parser_t *parser, bool canAssign)
+{
+    expression(parser);
+    consume(parser, TOKEN_RIGHT_BRACKET, "Expected closing ']'");
+
+    if (canAssign && match(parser, TOKEN_EQUAL)) {
+        expression(parser);
+        emitByte(parser, OP_SETI);
+
+        parser->hadAssign = true;
+    }
+    else {
+        emitByte(parser, OP_GETI);
+    }
+}
+
 static void literal(parser_t *parser, bool canAssign)
 {
     switch (parser->previous.type) {
@@ -495,7 +511,7 @@ static void string(parser_t *parser, bool canAssign)
 
 static void map(parser_t *parser, bool canAssign)
 {
-    consume(parser, TOKEN_RIGHT_BRACKET, "Expect ']' after map declaration.");
+    consume(parser, TOKEN_RIGHT_BRACKET, "Expected closing ']'.");
     emitByte(parser, OP_MAP);
 }
 
@@ -561,7 +577,7 @@ static void unary(parser_t *parser, bool canAssign)
 static rule_t rules[] = {
     { grouping, call,    PREC_CALL },       // TOKEN_LEFT_PAREN 
     { NULL,     NULL,    PREC_NONE },       // TOKEN_RIGHT_PAREN     
-    { map,      NULL,    PREC_NONE },       // TOKEN_LEFT_BRACKET
+    { map,      index_,  PREC_CALL },       // TOKEN_LEFT_BRACKET
     { NULL,     NULL,    PREC_NONE },       // TOKEN_RIGHT_BRACKET
     { NULL,     NULL,    PREC_NONE },       // TOKEN_LEFT_BRACE
     { NULL,     NULL,    PREC_NONE },       // TOKEN_RIGHT_BRACE
