@@ -221,6 +221,8 @@ tok_t lexer_scan(lexer_t *lexer)
     switch (c) {
         case '(': return makeToken(lexer, TOKEN_LEFT_PAREN);
         case ')': return makeToken(lexer, TOKEN_RIGHT_PAREN);
+        case '[': return makeToken(lexer, TOKEN_LEFT_BRACKET);
+        case ']': return makeToken(lexer, TOKEN_RIGHT_BRACKET);
         case '{': return makeToken(lexer, TOKEN_LEFT_BRACE);
         case '}': return makeToken(lexer, TOKEN_RIGHT_BRACE);
         case ';': return makeToken(lexer, TOKEN_SEMICOLON);

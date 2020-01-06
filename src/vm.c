@@ -571,6 +571,12 @@ static int execute(vm_t *vm)
             NEXT;
         }
 
+        CODE(MAP) {
+            map_t *map = map_new(vm, 0, 0);
+            PUSH(VAL_OBJ(map));
+            NEXT;
+        }
+
         CODE_ERR() {
             ERROR("Bad opcode, got %d!", PREV_BYTE());
         }

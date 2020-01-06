@@ -478,6 +478,12 @@ static void string(parser_t *parser, bool canAssign)
     emitConstant(parser, VAL_OBJ(s));
 }
 
+static void map(parser_t *parser, bool canAssign)
+{
+    consume(parser, TOKEN_RIGHT_BRACKET, "Expect ']' after map declaration.");
+    emitByte(parser, OP_MAP);
+}
+
 static void namedVariable(parser_t *parser, tok_t name, bool canAssign)
 {
     uint8_t getOp, setOp;
@@ -538,6 +544,8 @@ static void unary(parser_t *parser, bool canAssign)
 static rule_t rules[] = {
     { grouping, call,    PREC_CALL },       // TOKEN_LEFT_PAREN 
     { NULL,     NULL,    PREC_NONE },       // TOKEN_RIGHT_PAREN     
+    { map,      NULL,    PREC_NONE },       // TOKEN_LEFT_BRACKET
+    { NULL,     NULL,    PREC_NONE },       // TOKEN_RIGHT_BRACKET
     { NULL,     NULL,    PREC_NONE },       // TOKEN_LEFT_BRACE
     { NULL,     NULL,    PREC_NONE },       // TOKEN_RIGHT_BRACE
 

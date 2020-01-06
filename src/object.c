@@ -113,6 +113,9 @@ void obj_print(obj_t *object)
                 printf("fn: %s", function->name->chars);
             break;
         }
+        case OT_MAP:
+            printf("map: %p", object);
+            break;
         default:
             printf("obj: %p", object);
             break;
