@@ -32,15 +32,17 @@ struct _map {
 #define AS_STR(v)       ((str_t *)AS_OBJ(v))
 #define AS_CSTR(v)      (((str_t *)AS_OBJ(v))->chars)
 #define AS_FUN(v)       ((fun_t *)AS_OBJ(v))
+#define AS_MAP(v)       ((map_t *)AS_OBJ(v))
 
 #define OBJ_TYPE(v)     (AS_OBJ(v)->type)
-
-#define IS_STR(v)       (OBJ_TYPE(v) == OT_STR)
-#define IS_FUN(v)       (OBJ_TYPE(v) == OT_FUN)
 
 static inline bool obj_is(val_t value, otype_t type) {
     return IS_OBJ(value) && OBJ_TYPE(value) == type;
 }
+
+#define IS_STR(v)       (obj_is(v, OT_STR))
+#define IS_FUN(v)       (obj_is(v, OT_FUN))
+#define IS_MAP(v)       (obj_is(v, OT_MAP))
 
 str_t *str_take(vm_t *vm, char *chars, int length);
 str_t *str_copy(vm_t *vm, const char *chars, int length);

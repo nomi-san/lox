@@ -42,7 +42,9 @@
     _CODE(LD7)     	/* []       [-0, +1]    */ \
     _CODE(LD8)     	/* []       [-0, +1]    */ \
     _CODE(ST)      	/* [s]      [-0, +0]    */ \
-    _CODE(MAP)      /* []       [-0, +1]    */
+    _CODE(MAP)      /* []       [-0, +1]    */ \
+    _CODE(GET)                                 \
+    _CODE(SET)
 
 #define _CODE(x)    OP_##x,
 typedef enum { OPCODES() OPCODE_COUNT } opcode_t;

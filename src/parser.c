@@ -20,6 +20,7 @@ struct _parser {
     tok_t previous;
     int subExprs;
     bool hadCall;
+    bool hadAssign;
     bool hadError;
     bool panicMode;
 };
@@ -446,6 +447,20 @@ static void call(parser_t *parser, bool canAssign)
     emitBytes(parser, OP_CALL, argCount);
 }
 
+static void dot(parser_t *parser, bool canAssign)
+{
+    consume(parser, TOKEN_IDENTIFIER, "Expect member name.");
+    uint16_t name = identifierConstant(parser, &parser->previous);
+
+    if (canAssign && match(parser, TOKEN_EQUAL)) {
+        expression(parser);
+        emitBytes(parser, OP_SET, (uint8_t)name);
+    }
+    else {
+        emitBytes(parser, OP_GET, (uint8_t)name);
+    }
+}
+
 static void literal(parser_t *parser, bool canAssign)
 {
     switch (parser->previous.type) {
@@ -502,6 +517,8 @@ static void namedVariable(parser_t *parser, tok_t name, bool canAssign)
     if (canAssign && match(parser, TOKEN_EQUAL)) {
         expression(parser);
         emitSmart(parser, setOp, arg);
+
+        parser->hadAssign = true;
     }
     else {
         emitSmart(parser, getOp, arg);
@@ -550,7 +567,7 @@ static rule_t rules[] = {
     { NULL,     NULL,    PREC_NONE },       // TOKEN_RIGHT_BRACE
 
     { NULL,     NULL,    PREC_NONE },       // TOKEN_COMMA           
-    { NULL,     NULL,    PREC_NONE },       // TOKEN_DOT
+    { NULL,     dot,     PREC_CALL },       // TOKEN_DOT
 
     { unary,    binary,  PREC_TERM },       // TOKEN_MINUS           
     { NULL,     binary,  PREC_TERM },       // TOKEN_PLUS            
@@ -693,17 +710,18 @@ static void varDeclaration(parser_t *parser)
 static void expressionStatement(parser_t *parser)
 {
     parser->hadCall = false;
+    parser->hadAssign = false;
     parser->subExprs = 0;
 
     expression(parser);
-    match(parser, TOKEN_SEMICOLON);
+    emitByte(parser, OP_POP);
 
-    if (parser->subExprs <= 1 || !parser->hadCall) {
+    if ((parser->subExprs <= 1) && !parser->hadCall && !parser->hadAssign) {
         error(parser, "Unexpected expression syntax.");
         return;
     }
 
-    emitByte(parser, OP_POP);
+    match(parser, TOKEN_SEMICOLON);
 }
 
 static void ifStatement(parser_t *parser)

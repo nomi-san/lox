@@ -577,6 +577,37 @@ static int execute(vm_t *vm)
             NEXT;
         }
 
+        CODE(GET) {
+            if (IS_MAP(PEEK(0))) {
+                map_t *map = AS_MAP(PEEK(0));
+                str_t *name = READ_STR();
+                val_t value = VAL_NIL;
+                tab_get(&map->table, name, &value);
+                POP();
+                PUSH(value);
+            }
+            else {
+                ERROR("Operands must be a map.");
+            }
+            NEXT;
+        }
+
+        CODE(SET) {
+            if (IS_MAP(PEEK(1))) {
+                map_t *map = AS_MAP(PEEK(1));
+                str_t *name = READ_STR();
+                val_t value = PEEK(0);
+                tab_set(&map->table, name, value);
+                POP();
+                POP();
+                PUSH(value);
+            }
+            else {
+                ERROR("Operands must be a map.");
+            }
+            NEXT;
+        }
+
         CODE_ERR() {
             ERROR("Bad opcode, got %d!", PREV_BYTE());
         }
