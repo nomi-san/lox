@@ -76,6 +76,9 @@ static void errorAt(parser_t *parser, tok_t *token, const char *message)
     if (parser->panicMode) return;
     parser->panicMode = true;
 
+    int length = token->start - token->currentLine + token->length;
+    const char *line = token->currentLine;
+
     fprintf(stderr, "[%s:%d:%d] Error", parser->source->fname, token->line, token->column);
 
     if (token->type == TOKEN_EOF) {
@@ -88,7 +91,15 @@ static void errorAt(parser_t *parser, tok_t *token, const char *message)
         fprintf(stderr, " at '%.*s'", token->length, token->start);
     }
 
-    fprintf(stderr, ": %s\n", message);
+    if (token->type != TOKEN_EOF) {
+        fprintf(stderr, ": %s\n", message);
+        fprintf(stderr, "  | %.*s\n", length, line);
+        fprintf(stderr, "    %*s", length - token->length, "");
+        for (int i = 0; i < token->length; i++) fputc('^', stderr);
+        
+    }
+
+    fprintf(stderr, "\n");
     fflush(stderr);
     parser->hadError = true; 
 }
