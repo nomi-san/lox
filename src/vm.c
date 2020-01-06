@@ -105,7 +105,7 @@ static void concatenate(vm_t *vm)
     PUSH(VAL_OBJ(result));
 }
 
-static bool call(vm_t *vm, fun_t *function, int argCount)
+static bool prepareCall(vm_t *vm, fun_t *function, int argCount)
 {
     if (argCount != function->arity) {
         runtimeError(vm, "Expected %d arguments but got %d.",
@@ -131,7 +131,7 @@ static bool callValue(vm_t *vm, val_t callee, int argCount)
     if (IS_OBJ(callee)) {
         switch (OBJ_TYPE(callee)) {
             case OT_FUN:
-                return call(vm, AS_FUN(callee), argCount);
+                return prepareCall(vm, AS_FUN(callee), argCount);
 
             default:
                 // Non-callable object type.                   
