@@ -5,8 +5,11 @@
 
 void lexer_init(lexer_t *lexer, src_t *source)
 {
-    lexer->start = source->buffer;
-    lexer->current = source->buffer;
+    const char *start = source->buffer;
+
+    lexer->start = start;
+    lexer->current = start;
+    lexer->currentLine = start;
     lexer->line = 1;
     lexer->position = 1;
 }
@@ -51,6 +54,7 @@ static void newLine(lexer_t *lexer)
 {
     lexer->line++;
     lexer->position = 0;
+    lexer->currentLine = lexer->current + 1;
 }
 
 static bool match(lexer_t *lexer, char expected)
@@ -71,6 +75,7 @@ static tok_t makeToken(lexer_t *lexer, toktype_t type)
     token.length = (int)(lexer->current - lexer->start);
     token.line = lexer->line;
     token.column = lexer->position - token.length;
+    token.currentLine = lexer->currentLine;
 
     return token;
 }

@@ -29,17 +29,18 @@ typedef enum {
 } toktype_t;
 
 typedef struct {
-    toktype_t type;
     const char *start;
+    const char *currentLine;
+    toktype_t type;
     int length;
     int line;
     int column;
 } tok_t;
 
 typedef struct {
-    vm_t *vm;
     const char *start;
     const char *current;
+    const char *currentLine;
     int line;
     int position;
 } lexer_t;
