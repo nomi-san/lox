@@ -89,7 +89,8 @@ static void errorAt(parser_t *parser, tok_t *token, const char *message)
     }
 
     fprintf(stderr, ": %s\n", message);
-    parser->hadError = true;
+    fflush(stderr);
+    parser->hadError = true; 
 }
 
 static void error(parser_t *parser, const char *message)
@@ -679,7 +680,7 @@ static void expressionStatement(parser_t *parser)
     match(parser, TOKEN_SEMICOLON);
 
     if (parser->subExprs <= 1 || !parser->hadCall) {
-        error(parser, "Unexpected expression.");
+        error(parser, "Unexpected expression syntax.");
         return;
     }
 
