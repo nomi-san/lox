@@ -1,0 +1,4 @@
+var h = 'Hello'
+var w = ' world!'
+
+print h + w
