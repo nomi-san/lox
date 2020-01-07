@@ -5,7 +5,6 @@
 #include "object.h"
 #include "vm.h"
 #include "gc.h"
-#include "table.h"
 
 #define ALLOC(gc, size) \
     gc_realloc(gc, NULL, 0, size)
@@ -79,7 +78,7 @@ map_t *map_new(vm_t *vm, int arr_cap, int tab_cap)
 {
     map_t *map = ALLOC_OBJ(vm, map_t, OT_MAP);
 
-    arr_init(&map->array);
+    hash_init(&map->hash);
     tab_init(&map->table);
     // todo
     return map;
@@ -139,7 +138,7 @@ void obj_free(gc_t *gc, obj_t *object)
         }
         case OT_MAP: {
             map_t *map = (map_t *)object;
-            arr_free(&map->array);
+            hash_free(&map->hash);
             tab_free(&map->table);
             FREE(gc, map_t, map);
             break;

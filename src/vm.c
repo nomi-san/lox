@@ -575,8 +575,8 @@ static int execute(vm_t *vm)
             uint8_t count = READ_BYTE();
             map_t *map = map_new(vm, 0, 0);
 
-            for (int i = count - 1; i >= 0; i--) {
-                arr_add(&map->array, PEEK(i), true);
+            for (val_t i = VAL_NUM(count - 1); AS_NUM(i) >= 0; AS_NUM(i) -= 1) {
+                hash_set(&map->hash, AS_RAW(i), PEEK((int)AS_NUM(i)));
             }
 
             POPN(count);
@@ -622,15 +622,13 @@ static int execute(vm_t *vm)
                 }
 
                 map_t *map = AS_MAP(PEEK(1));
-                int index = (int)AS_NUM(PEEK(0));
-
-                if (index >= map->array.count) {
-                    ERROR("The index out of bound map.");
-                }
+                uint64_t key = AS_RAW(PEEK(0));
+                val_t value = VAL_NIL;
+                hash_get(&map->hash, key, &value);
 
                 POP();
                 POP();
-                PUSH(map->array.values[index]);
+                PUSH(value);
             }
             else {
                 ERROR("Operands must be a map.");
@@ -645,16 +643,13 @@ static int execute(vm_t *vm)
                 }
 
                 map_t *map = AS_MAP(PEEK(2));
-                int index = (int)AS_NUM(PEEK(1));   
+                uint64_t key = AS_RAW(PEEK(1));
+                val_t value = POP();
+                hash_set(&map->hash, key, value);
 
-                if (index >= map->array.count) {
-                    ERROR("The index out of bound map.");
-                }
-
-                map->array.values[index] = POP();
                 POP();
                 POP();
-                PUSH(PEEK(0));
+                PUSH(value);
             }
             else {
                 ERROR("Operands must be a map.");

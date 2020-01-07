@@ -74,8 +74,9 @@ static const val_t VAL_FALSE = { .type = VT_BOOL, .Bool = false };
 #define AS_BOOL(v)      ((v).Bool)
 #define AS_NUM(v)       ((v).Num)
 #define AS_OBJ(v)       ((v).Obj)
-#define AS_CFN(v)    ((v).CFn)
+#define AS_CFN(v)       ((v).CFn)
 #define AS_TYPE(v)      ((v).type)
+#define AS_RAW(v)       ((v).raw)
 
 #define IS_NIL(v)       (AS_TYPE(v) == VT_NIL)
 #define IS_BOOL(v)      (AS_TYPE(v) == VT_BOOL)
@@ -83,7 +84,7 @@ static const val_t VAL_FALSE = { .type = VT_BOOL, .Bool = false };
 #define IS_OBJ(v)       (AS_TYPE(v) == VT_OBJ)
 #define IS_CFN(v)       (AS_TYPE(v) == VT_CFN)
 
-#define IS_FALSEY(v)    (!(bool)(v).raw)
+#define IS_FALSEY(v)    (!(bool)AS_RAW(v))
 
 void val_print(val_t value);
 bool val_equal(val_t a, val_t b);

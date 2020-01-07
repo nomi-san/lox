@@ -3,6 +3,7 @@
 #include "value.h"
 #include "chunk.h"
 #include "table.h"
+#include "hash.h"
 
 struct _obj {
     otype_t type;
@@ -25,7 +26,7 @@ struct _fun {
 
 struct _map {
     obj_t obj;
-    arr_t array;
+    hash_t hash;
     tab_t table;
 };
 
