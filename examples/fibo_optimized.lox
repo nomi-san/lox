@@ -1,0 +1,11 @@
+// Recursive fibonacci with map caching
+
+var cache = []
+
+fun fib(n) {
+    if (n < 2) return n
+    if (cache[n]) return cache[n]
+    return cache[n] = fib(n-2) + fib(n-1)
+}
+
+print fib(40)
