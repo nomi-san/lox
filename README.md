@@ -7,7 +7,7 @@ The implementation of the **Lox** programming language, with virtual machine in 
 - [x] Cross-platform
 - [ ] Register-based virtual machine
 - [ ] Implement challenges
-- [ ] No-need semicolon
+- [x] No-need semicolon
 - [ ] Concurrency programming
 
 ### references
