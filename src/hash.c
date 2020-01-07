@@ -22,10 +22,26 @@ void hash_free(hash_t *hash)
 static index_t *hash_find(index_t *indexes, int capacity, uint64_t key)
 {
     uint32_t i = key % capacity;
+    index_t *tombstone = NULL;
 
     for (;;) {
         index_t *index = &indexes[i];
-        if (index->key == key) return index;
+
+        if (index->key == UNUSED_INDEX) {
+            if (IS_NIL(index->value)) {
+                // Empty entry.                              
+                return tombstone != NULL ? tombstone : index;
+            }
+            else {
+                // We found a tombstone.                     
+                if (tombstone == NULL) tombstone = index;
+            }
+        }
+        else if (index->key == key) {
+            // We found the key.
+            return index;
+        }
+
         i = (i + 1) % capacity;
     }
 }
