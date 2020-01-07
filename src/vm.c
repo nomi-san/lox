@@ -617,18 +617,29 @@ static int execute(vm_t *vm)
 
         CODE(GETI) {
             if (IS_MAP(PEEK(1))) {
-                if (!IS_NUM(PEEK(0))) {
-                    ERROR("Operands must be a number.");
+                if (IS_NUM(PEEK(0))) {
+                    map_t *map = AS_MAP(PEEK(1));
+                    uint64_t key = AS_RAW(PEEK(0));
+                    val_t value = VAL_NIL;
+                    hash_get(&map->hash, key, &value);
+
+                    POP();
+                    POP();
+                    PUSH(value);
                 }
+                else if (IS_STR(PEEK(0))) {
+                    map_t *map = AS_MAP(PEEK(1));
+                    str_t *key = AS_STR(PEEK(0));
+                    val_t value = VAL_NIL;
+                    tab_get(&map->table, key, &value);
 
-                map_t *map = AS_MAP(PEEK(1));
-                uint64_t key = AS_RAW(PEEK(0));
-                val_t value = VAL_NIL;
-                hash_get(&map->hash, key, &value);
-
-                POP();
-                POP();
-                PUSH(value);
+                    POP();
+                    POP();
+                    PUSH(value);
+                }
+                else {
+                    ERROR("Operands must be a number or string.");
+                }
             }
             else {
                 ERROR("Operands must be a map.");
@@ -638,18 +649,30 @@ static int execute(vm_t *vm)
 
         CODE(SETI) {
             if (IS_MAP(PEEK(2))) {
-                if (!IS_NUM(PEEK(1))) {
-                    ERROR("Operands must be a number.");
+                if (IS_NUM(PEEK(1))) {
+                    map_t *map = AS_MAP(PEEK(2));
+                    uint64_t key = AS_RAW(PEEK(1));
+                    val_t value = POP();
+                    hash_set(&map->hash, key, value);
+
+                    POP();
+                    POP();
+                    PUSH(value);
                 }
+                else if (IS_STR(PEEK(1)))
+                {
+                    map_t *map = AS_MAP(PEEK(2));
+                    str_t *key = AS_STR(PEEK(1));
+                    val_t value = POP();
+                    tab_set(&map->table, key, value);
 
-                map_t *map = AS_MAP(PEEK(2));
-                uint64_t key = AS_RAW(PEEK(1));
-                val_t value = POP();
-                hash_set(&map->hash, key, value);
-
-                POP();
-                POP();
-                PUSH(value);
+                    POP();
+                    POP();
+                    PUSH(value);
+                }
+                else {
+                    ERROR("Operands must be a number or string.");
+                }
             }
             else {
                 ERROR("Operands must be a map.");
