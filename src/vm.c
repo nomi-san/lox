@@ -708,3 +708,14 @@ int vm_dofile(vm_t *vm, const char *fname)
     src_free(source);
     return result;
 }
+
+void set_global(vm_t *vm, const char *name, val_t value)
+{
+    val_t global = VAL_OBJ(str_copy(vm, name, (int)strlen(name)));
+
+    PUSH(global);
+    PUSH(value);
+    tab_set(&vm->globals, AS_STR(global), value);
+    POP();
+    POP();
+}

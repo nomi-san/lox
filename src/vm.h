@@ -25,4 +25,7 @@ struct _vm {
 
 vm_t *vm_create();
 void vm_close(vm_t *vm);
+
 int vm_dofile(vm_t *vm, const char *fname);
+
+void set_global(vm_t *vm, const char *name, val_t value);
