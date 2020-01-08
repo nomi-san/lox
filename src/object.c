@@ -17,7 +17,7 @@
 
 static obj_t *allocateObject(vm_t *vm, size_t size, otype_t type)
 {
-    gc_t *gc = &vm->gc;
+    gc_t *gc = vm->gc;
 
     obj_t *object = ALLOC(gc, size);
     object->type = type;
@@ -34,7 +34,7 @@ static str_t *allocateString(vm_t *vm, char *chars, int length, uint32_t hash)
     string->chars = chars;
     string->hash = hash;
 
-    tab_set(&vm->strings, string, VAL_NIL);
+    tab_set(vm->strings, string, VAL_NIL);
 
     return string;
 }
@@ -42,7 +42,7 @@ static str_t *allocateString(vm_t *vm, char *chars, int length, uint32_t hash)
 str_t *str_take(vm_t *vm, char *chars, int length)
 {
     uint32_t hash = hash_bytes(chars, length);
-    str_t *interned = tab_findstr(&vm->strings, chars, length, hash);
+    str_t *interned = tab_findstr(vm->strings, chars, length, hash);
     if (interned != NULL) {
         free(chars);
         return interned;
@@ -54,7 +54,7 @@ str_t *str_take(vm_t *vm, char *chars, int length)
 str_t *str_copy(vm_t *vm, const char *chars, int length)
 {
     uint32_t hash = hash_bytes(chars, length);
-    str_t *interned = tab_findstr(&vm->strings, chars, length, hash);
+    str_t *interned = tab_findstr(vm->strings, chars, length, hash);
     if (interned != NULL) return interned;
 
     char *heapChars = malloc((length + 1) * sizeof(char));

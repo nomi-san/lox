@@ -52,10 +52,13 @@ vm_t *vm_create()
     if (vm == NULL) return NULL;
 
     memset(vm, '\0', sizeof(vm_t));
+    vm->gc = malloc(sizeof(gc_t));
+    vm->globals = malloc(sizeof(tab_t));
+    vm->strings = malloc(sizeof(tab_t));
 
-    gc_init(&vm->gc);
-    tab_init(&vm->globals);
-    tab_init(&vm->strings);
+    gc_init(vm->gc);
+    tab_init(vm->globals);
+    tab_init(vm->strings);
 
     resetStack(vm);
     return vm;
@@ -65,9 +68,13 @@ void vm_close(vm_t *vm)
 {
     if (vm == NULL) return;
 
-    tab_free(&vm->globals);
-    tab_free(&vm->strings);
-    gc_free(&vm->gc);
+    tab_free(vm->globals);
+    tab_free(vm->strings);
+    gc_free(vm->gc);
+
+    free(vm->globals);
+    free(vm->strings);
+    free(vm->gc);
 
     free(vm);
 }
@@ -83,7 +90,7 @@ static void defineNative(vm_t *vm, const char *name, cfn_t function)
     val_t gname = VAL_OBJ(str_copy(vm, name, (int)strlen(name)));
 
     PUSH(gname);
-    tab_set(&vm->globals, AS_STR(gname), native);
+    tab_set(vm->globals, AS_STR(gname), native);
     POP();
 }
 
@@ -493,7 +500,7 @@ static int execute(vm_t *vm)
 
         CODE(DEF) {
             str_t *name = READ_STR();
-            tab_set(&vm->globals, name, PEEK(0));
+            tab_set(vm->globals, name, PEEK(0));
             POP();
             NEXT;
         }
@@ -501,7 +508,7 @@ static int execute(vm_t *vm)
         CODE(GLD) {
             str_t *name = READ_STR();
             val_t value;      
-            if (!tab_get(&vm->globals, name, &value)) {
+            if (!tab_get(vm->globals, name, &value)) {
                 ERROR("Undefined variable '%s'.", name->chars);
             }
             PUSH(value);
@@ -510,8 +517,8 @@ static int execute(vm_t *vm)
 
         CODE(GST) {
             str_t *name = READ_STR();
-            if (tab_set(&vm->globals, name, PEEK(0))) {
-                tab_remove(&vm->globals, name);
+            if (tab_set(vm->globals, name, PEEK(0))) {
+                tab_remove(vm->globals, name);
                 ERROR("Undefined variable '%s'.", name->chars);
             }
             NEXT;
@@ -696,7 +703,7 @@ void set_global(vm_t *vm, const char *name, val_t value)
 
     PUSH(global);
     PUSH(value);
-    tab_set(&vm->globals, AS_STR(global), value);
+    tab_set(vm->globals, AS_STR(global), value);
     POP();
     POP();
 }

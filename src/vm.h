@@ -12,15 +12,15 @@ typedef struct {
     val_t *slots;
 } frame_t;
 
-struct _vm {   
+struct _vm {
+    val_t *top;
     val_t stack[STACK_MAX];
     frame_t frames[FRAMES_MAX];
-    val_t *top;
     int frameCount;
 
-    gc_t gc;
-    tab_t strings;
-    tab_t globals;
+    gc_t  *gc;
+    tab_t *strings;
+    tab_t *globals;
 };
 
 vm_t *vm_create();
