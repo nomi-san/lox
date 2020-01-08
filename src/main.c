@@ -15,6 +15,7 @@ int main(int argc, char **argv)
 
     if (vm != NULL) {
         load_libmath(vm);
+        load_libthread(vm);
         ret = vm_dofile(vm, argv[argc - 1]);
         vm_close(vm);
     }
