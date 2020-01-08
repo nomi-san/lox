@@ -76,6 +76,8 @@ static const val_t VAL_FALSE = { .type = VT_BOOL, .Bool = false };
 #define AS_OBJ(v)       ((v).Obj)
 #define AS_CFN(v)       ((v).CFn)
 #define AS_TYPE(v)      ((v).type)
+
+#define AS_INT(v)       ((int)AS_NUM(v))
 #define AS_RAW(v)       ((v).raw)
 
 #define IS_NIL(v)       (AS_TYPE(v) == VT_NIL)
