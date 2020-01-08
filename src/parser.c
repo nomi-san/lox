@@ -182,40 +182,25 @@ static void emitReturn(parser_t *parser)
     emitByte(parser, OP_RET);
 }
 
-static uint16_t makeConstant(parser_t *parser, val_t value)
+static uint8_t makeConstant(parser_t *parser, val_t value)
 {
     int constant = arr_add(&currentChunk(parser)->constants, value, false);
-    if (constant > UINT16_MAX) {
+    if (constant > UINT8_MAX) {
         error(parser, "Too many constants in one chunk.");
         return 0;
     }
 
-    return (uint16_t)constant;
+    return (uint8_t)constant;
 }
 
 static void emitSmart(parser_t *parser, uint8_t op, int arg)
 {
-#define CHANGE(x)   (op == x) op = x##L
-    if (arg > UINT8_MAX) {
-        if CHANGE(OP_GLD);
-        if CHANGE(OP_GST);
-        if CHANGE(OP_DEF);
-        if CHANGE(OP_CONST);
-        emitByte(parser, op);
-        emitBytes(parser, (arg >> 8) & 0xFF, arg & 0xFF);
-        return;
-    }
-#undef CHANGE
-    if (op == OP_LD && arg <= 8) {
-        emitByte(parser, (uint8_t)(OP_LD0 + arg));
-        return;
-    }
     emitBytes(parser, op, (uint8_t)arg);
 }
 
 static void emitConstant(parser_t *parser, val_t value)
 {
-    uint16_t constant = makeConstant(parser, value);
+    uint8_t constant = makeConstant(parser, value);
     emitSmart(parser, OP_CONST, constant);
 }
 
@@ -294,7 +279,7 @@ static void declaration(parser_t *parser);
 static rule_t *getRule(toktype_t type);
 static void parsePrecedence(parser_t *parser, prec_t precedence);
 
-static uint16_t identifierConstant(parser_t *parser, tok_t *name)
+static uint8_t identifierConstant(parser_t *parser, tok_t *name)
 {
     str_t *id = str_copy(parser->vm, name->start, name->length);
     return makeConstant(parser, VAL_OBJ(id));
@@ -357,7 +342,7 @@ static void declareVariable(parser_t *parser)
     addLocal(parser, *name);
 }
 
-static uint16_t parseVariable(parser_t *parser, const char *errorMessage)
+static uint8_t parseVariable(parser_t *parser, const char *errorMessage)
 {
     consume(parser, TOKEN_IDENTIFIER, errorMessage);
 
@@ -376,7 +361,7 @@ static void markInitialized(parser_t *parser)
         current->scopeDepth;
 }
 
-static void defineVariable(parser_t *parser, uint16_t global)
+static void defineVariable(parser_t *parser, uint8_t global)
 {
     if (parser->compiler->scopeDepth > 0) {
         markInitialized(parser);
@@ -450,7 +435,7 @@ static void call(parser_t *parser, bool canAssign)
 static void dot(parser_t *parser, bool canAssign)
 {
     consume(parser, TOKEN_IDENTIFIER, "Expect member name.");
-    uint16_t name = identifierConstant(parser, &parser->previous);
+    uint8_t name = identifierConstant(parser, &parser->previous);
 
     if (canAssign && match(parser, TOKEN_EQUAL)) {
         expression(parser);
@@ -693,7 +678,7 @@ static void function(parser_t *parser, funtype_t type)
             if (arity > 32) {
                 errorAtCurrent(parser, "Cannot have more than 32 parameters.");
             }
-            uint16_t paramConstant = parseVariable(parser, "Expect parameter name.");
+            uint8_t paramConstant = parseVariable(parser, "Expect parameter name.");
             defineVariable(parser, paramConstant);
         } while (match(parser, TOKEN_COMMA));
     }
@@ -705,14 +690,14 @@ static void function(parser_t *parser, funtype_t type)
 
     // Create the function object.                                
     fun_t *function = endCompiler(parser);
-    uint16_t constant = makeConstant(parser, VAL_OBJ(function));
+    uint8_t constant = makeConstant(parser, VAL_OBJ(function));
 
     emitSmart(parser, OP_CONST, constant);
 }
 
 static void funDeclaration(parser_t *parser)
 {
-    uint16_t global = parseVariable(parser, "Expect function name.");
+    uint8_t global = parseVariable(parser, "Expect function name.");
     markInitialized(parser);
     function(parser, TYPE_FUNCTION);
     defineVariable(parser, global);
@@ -720,7 +705,7 @@ static void funDeclaration(parser_t *parser)
 
 static void varDeclaration(parser_t *parser)
 {
-    uint16_t global = parseVariable(parser, "Expect variable name.");
+    uint8_t global = parseVariable(parser, "Expect variable name.");
 
     if (match(parser, TOKEN_EQUAL)) {
         expression(parser);

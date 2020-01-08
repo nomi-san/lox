@@ -13,7 +13,6 @@
     _CODE(TRUE)    	/* []       [-0, +1]    push true to stack */ \
     _CODE(FALSE)   	/* []       [-0, +1]    push false to stack */ \
     _CODE(CONST)   	/* [k]      [-0, +1]    push a constant from (k) to stack */ \
-    _CODE(CONSTL)  	/* [k, k]   [-0, +1]    */ \
     _CODE(NEG)     	/* []       [-1, +1]    */ \
     _CODE(NOT)     	/* []       [-1, +1]    */ \
     _CODE(LT)      	/* []       [-1, +1]    */ \
@@ -26,9 +25,6 @@
     _CODE(DEF)     	/* [k]      [-1, +0]    pop a value from stack and define as (k) in global */ \
     _CODE(GLD)     	/* [k]      [-0, +1]    push a from (k) in global to stack */ \
     _CODE(GST)     	/* [k]      [-0, +0]    set a value from stack as (k) in global */ \
-    _CODE(DEFL)    	/* [k, k]   [-1, +0]    */ \
-    _CODE(GLDL)    	/* [k, k]   [-0, +1]    */ \
-    _CODE(GSTL)    	/* [k, k]   [-0, +0]    */ \
     _CODE(JMP)     	/* [s, s]   [-0, +0]    */ \
     _CODE(JMPF)    	/* [s, s]   [-1, +0]    */ \
     _CODE(LD)      	/* [s]      [-0, +1]    */ \

@@ -176,9 +176,7 @@ static int execute(vm_t *vm)
 #define READ_SHORT()    (ip += 2, (uint16_t)((ip[-2] << 8) | ip[-1]))
 
 #define READ_CONST()    CONSTS[READ_BYTE()]
-#define READ_CONSTL()   CONSTS[READ_SHORT()]
 #define READ_STR()      AS_STR(READ_CONST())
-#define READ_STRL()     AS_STR(READ_CONSTL())
 
 #define ERROR(fmt, ...) \
     do { \
@@ -254,11 +252,6 @@ static int execute(vm_t *vm)
 
         CODE(CONST) {
             PUSH(READ_CONST());
-            NEXT;
-        }
-
-        CODE(CONSTL) {
-            PUSH(READ_CONSTL());
             NEXT;
         }
 
@@ -498,24 +491,16 @@ static int execute(vm_t *vm)
             ERROR("Operands must be two numbers/booleans.");
         }
 
-        CODE(DEFL) {
-            str_t *name = READ_STRL();
-            goto _def;
-        CODE(DEF)
-            name = READ_STR();
-        _def:
+        CODE(DEF) {
+            str_t *name = READ_STR();
             tab_set(&vm->globals, name, PEEK(0));
             POP();
             NEXT;
         }
 
-        CODE(GLDL) {
-            str_t *name = READ_STRL();
-            val_t value;
-            goto _gld;
-        CODE(GLD)
-            name = READ_STR();
-        _gld:            
+        CODE(GLD) {
+            str_t *name = READ_STR();
+            val_t value;      
             if (!tab_get(&vm->globals, name, &value)) {
                 ERROR("Undefined variable '%s'.", name->chars);
             }
@@ -523,12 +508,8 @@ static int execute(vm_t *vm)
             NEXT;
         }
 
-        CODE(GSTL) {
-            str_t *name = READ_STRL();
-            goto _gst;
-        CODE(GST)
-            name = READ_STR();
-        _gst:
+        CODE(GST) {
+            str_t *name = READ_STR();
             if (tab_set(&vm->globals, name, PEEK(0))) {
                 tab_remove(&vm->globals, name);
                 ERROR("Undefined variable '%s'.", name->chars);
