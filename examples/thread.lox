@@ -1,0 +1,33 @@
+print thread  // Lib thread
+
+// Routine callback
+fun routine() {
+    print 2
+    thread.sleep(100)
+    print 2
+    thread.sleep(100)
+    print 2
+    thread.sleep(100)
+    print 2
+    thread.sleep(100)
+}
+
+// Create a thread
+var th = thread.create(routine)
+// Start the thread
+thread.start(th)
+
+print 1
+thread.sleep(50)
+print 1
+thread.sleep(50)
+print 1
+thread.sleep(50)
+print 1
+thread.sleep(50)
+
+// Wait for thread done
+thread.join(th)
+
+// Close the thread
+thread.close(th)
