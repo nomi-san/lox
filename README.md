@@ -1,5 +1,5 @@
 # lox
-The implementation of the **Lox** programming language, with virtual machine in **C**.
+The implementation of the **Lox** programming language, on bytecode virtual machine, in **C**.
 
 #### Current chapter: [Ch.24 Calls and Functions](http://www.craftinginterpreters.com/calls-and-functions.html)
 
