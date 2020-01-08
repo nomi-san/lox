@@ -16,6 +16,8 @@ const char *val_typeof(val_t value)
             return "num";
         case VT_CFN:
             return "fn";
+        case VT_PTR:
+            return "ptr";
         case VT_OBJ:
             return obj_typeof(AS_OBJ(value));
     }
@@ -35,6 +37,9 @@ void val_print(val_t value)
             break;
         case VT_CFN:
             printf("fn: %p", AS_CFN(value));
+            break;
+        case VT_PTR:
+            printf("ptr: %p", AS_PTR(value));
             break;
         case VT_OBJ:
             obj_print(AS_OBJ(value));
@@ -58,6 +63,8 @@ bool val_equal(val_t a, val_t b)
             return AS_OBJ(a) == AS_OBJ(b);
         case VT_CFN_CFN:
             return AS_CFN(a) == AS_CFN(b);
+        case VT_PTR_PTR:
+            return AS_PTR(a) == AS_PTR(b);
         case VT_BOOL_NUM:
             return (double)AS_BOOL(a) == AS_NUM(b);
         case VT_NUM_BOOL:
