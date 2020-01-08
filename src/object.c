@@ -87,7 +87,13 @@ map_t *map_new(vm_t *vm, int arr_cap, int tab_cap)
 void map_set(vm_t *vm, map_t *map, const char *key, val_t value)
 {
     str_t *field = str_copy(vm, key, (int)strlen(key));
+
+    vm_push(vm, value);
+    vm_push(vm, VAL_OBJ(field));
     tab_set(&map->table, field, value);
+
+    vm_pop(vm);
+    vm_pop(vm);
 }
 
 const char *obj_typeof(obj_t *object)
