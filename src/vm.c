@@ -150,7 +150,7 @@ static bool prepareCall(vm_t *vm, fun_t *function, int argCount)
     return true;
 }
 
-static bool callValue(vm_t *vm, val_t callee, int argCount)
+bool vm_call(vm_t *vm, val_t callee, int argCount)
 {
     if (IS_OBJ(callee)) {
         switch (OBJ_TYPE(callee)) {
@@ -174,7 +174,7 @@ static bool callValue(vm_t *vm, val_t callee, int argCount)
     return false;
 }
 
-static int execute(vm_t *vm)
+int vm_execute(vm_t *vm)
 {
     register uint8_t *ip;
     register val_t *stack;
@@ -281,7 +281,7 @@ static int execute(vm_t *vm)
             int argCount = READ_BYTE();
 
             STORE_FRAME();
-            if (!callValue(vm, PEEK(argCount), argCount)) {
+            if (!vm_call(vm, PEEK(argCount), argCount)) {
                 return VM_RUNTIME_ERROR;
             }
 
@@ -703,9 +703,9 @@ int vm_dofile(vm_t *vm, const char *fname)
         val_t script = VAL_OBJ(function);
 
         PUSH(script);
-        callValue(vm, script, 0);
+        vm_call(vm, script, 0);
 
-        result = execute(vm);  
+        result = vm_execute(vm);  
     }
 
     src_free(source);
