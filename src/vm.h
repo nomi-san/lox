@@ -29,3 +29,6 @@ void vm_close(vm_t *vm);
 int vm_dofile(vm_t *vm, const char *fname);
 
 void set_global(vm_t *vm, const char *name, val_t value);
+
+void vm_push(vm_t *vm, val_t value);
+val_t vm_pop(vm_t *vm);

@@ -719,3 +719,13 @@ void set_global(vm_t *vm, const char *name, val_t value)
     POP();
     POP();
 }
+
+void vm_push(vm_t *vm, val_t value)
+{
+    PUSH(value);
+}
+
+val_t vm_pop(vm_t *vm)
+{
+    return POP();
+}
