@@ -4,6 +4,7 @@
 #include <windows.h>
 #else
 #include <unistd.h>
+#include <pthread.h>
 #endif
 
 #include "libs.h"
@@ -17,6 +18,7 @@ typedef struct {
 #ifdef _WIN32
     HANDLE handle;
 #else
+    // todo
 #endif
     bool running;
 } thread_t;
