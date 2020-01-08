@@ -8,7 +8,7 @@ The implementation of the **Lox** programming language, with virtual machine in 
 - [ ] Register-based virtual machine
 - [ ] Implement challenges
 - [x] No-need semicolon
-- [ ] Concurrency programming
+- [x] Concurrency programming
 
 ### references
 - [The Lox Language](http://craftinginterpreters.com/the-lox-language.html)
