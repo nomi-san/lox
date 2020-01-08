@@ -47,8 +47,11 @@ static inline bool obj_is(val_t value, otype_t type) {
 
 str_t *str_take(vm_t *vm, char *chars, int length);
 str_t *str_copy(vm_t *vm, const char *chars, int length);
+
 fun_t *fun_new(vm_t *vm, src_t *source);
+
 map_t *map_new(vm_t *vm, int arr_cap, int tab_cap);
+void map_set(vm_t *vm, map_t *map, const char *key, val_t value);
 
 const char *obj_typeof(obj_t *object);
 void obj_print(obj_t *object);
