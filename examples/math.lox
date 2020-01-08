@@ -1,0 +1,13 @@
+
+print math
+
+print math.abs(-50)
+print math.pow(2, 8)
+
+print math.ceil(3.5)
+print math.floor(5.2)
+
+print math.cos(45)
+print math.sin(90)
+
+print math.sqrt(2)
