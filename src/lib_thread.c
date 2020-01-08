@@ -1,14 +1,14 @@
 #include <stdlib.h>
 
-#include "libs.h"
-#include "vm.h"
-#include "value.h"
-
 #ifdef _WIN32
-__declspec(dllimport) void __stdcall Sleep(unsigned long);
+#include <windows.h>
 #else
 #include <unistd.h>
 #endif
+
+#include "libs.h"
+#include "vm.h"
+#include "value.h"
 
 static val_t thread_sleep(vm_t *vm, int argc, val_t *args)
 {

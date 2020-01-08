@@ -9,10 +9,11 @@ typedef struct _map map_t;
 
 typedef enum {
     VT_NIL,
-    VT_BOOL,
+    VT_BOOL_,
     VT_NUM,
     VT_OBJ,
     VT_CFN
+#define VT_BOOL VT_BOOL_
 } vtype_t;
 
 typedef enum {
