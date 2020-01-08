@@ -23,6 +23,30 @@ static val_t thread_sleep(vm_t *vm, int argc, val_t *args)
     return VAL_NIL;
 }
 
+static val_t thread_create(vm_t *vm, int argc, val_t *args)
+{
+
+    return VAL_NIL;
+}
+
+static val_t thread_exit(vm_t *vm, int argc, val_t *args)
+{
+
+    return VAL_NIL;
+}
+
+static val_t thread_join(vm_t *vm, int argc, val_t *args)
+{
+
+    return VAL_NIL;
+}
+
+static val_t thread_cancel(vm_t *vm, int argc, val_t *args)
+{
+
+    return VAL_NIL;
+}
+
 void load_libthread(vm_t *vm)
 {
     map_t *thread = map_new(vm, 0, 0);
