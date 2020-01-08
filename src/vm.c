@@ -79,6 +79,21 @@ void vm_close(vm_t *vm)
     free(vm);
 }
 
+vm_t *vm_clone(vm_t *from)
+{
+    vm_t *vm = malloc(sizeof(vm_t));
+    if (vm == NULL) return NULL;
+
+    memset(vm, '\0', sizeof(vm_t));
+
+    vm->gc = from->gc;
+    vm->globals = from->globals;
+    vm->strings = from->strings;
+
+    resetStack(vm);
+    return vm;
+}
+
 #define PUSH(v)     *((vm)->top++) = (v)
 #define POP()       *(--(vm)->top)
 #define POPN(n)     *((vm)->top -= (n))

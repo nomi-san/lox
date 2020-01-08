@@ -25,6 +25,7 @@ struct _vm {
 
 vm_t *vm_create();
 void vm_close(vm_t *vm);
+vm_t *vm_clone(vm_t *from);
 
 int vm_dofile(vm_t *vm, const char *fname);
 
