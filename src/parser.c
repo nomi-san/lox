@@ -468,7 +468,7 @@ static void literal(parser_t *parser, bool canAssign)
         case TOKEN_FALSE:   emitByte(parser, OP_FALSE); break;
         case TOKEN_NIL:     emitByte(parser, OP_NIL); break;
         case TOKEN_TRUE:    emitByte(parser, OP_TRUE); break;
-        case TOKEN_FUN:     emitByte(parser, OP_LD0); break;
+        case TOKEN_FUN:     emitBytes(parser, OP_LD, 0); break;
         default:
             return; // Unreachable.                   
     }

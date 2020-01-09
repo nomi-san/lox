@@ -539,19 +539,6 @@ int vm_execute(vm_t *vm)
             NEXT;
         }
 
-        CODE(LD0)
-        CODE(LD1)
-        CODE(LD2)
-        CODE(LD3)
-        CODE(LD4)
-        CODE(LD5)
-        CODE(LD6)
-        CODE(LD7)
-        CODE(LD8) {
-            PUSH(STACK[PREV_BYTE() - OP_LD0]);
-            NEXT;
-        }
-
         CODE(LD) {
             PUSH(STACK[READ_BYTE()]);
             NEXT;
